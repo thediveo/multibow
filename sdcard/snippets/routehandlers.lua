@@ -24,26 +24,40 @@ SOFTWARE.
 -- their correct handlers, depending on which keyboard layout currently
 -- is active.
 function mb.route(keyno, pressed)
-  -- Check key in permanent keymaps
   local keydef
-  for name, pkm in pairs(mb.permanent_keymaps) do
-    keydef = pkm[keyno]
-    if keydef ~= nil then; break; end
-  end
-  -- Check key in current keymap
-  if keydef == nil and mb.current_keymap_set ~= nil then
-    keydef = mb.current_keymap_set[mb.current_keymap_idx][keyno]
+  -- Checks for a keymap grab being enforced at this time...
+  if mb.grab_keymap then
+    print("routing GRABBED key")
+    keydef = mb.grab_keymap[keyno]
+  else
+    -- Checks for key in permanent keymaps first...
+    for name, keymap in pairs(mb.keymaps) do
+      if keymap.permanent then
+        keydef = keymap[keyno]
+        if keydef then; break; end
+      end
+    end
+    -- Checks for key in current keymap if no persistent key was found yet.
+    if not keydef and mb.current_keymap then
+      keydef = mb.current_keymap[keyno]
+    end
   end
 
-  if keydef == nil then; return; end
+  -- Bails out if no key definition to route to could be found.
+  if not keydef then; return; end
 
+  --
   if pressed then
     for led = 0, 11 do
       if led ~= keyno then; mb.led(led, {r=0, g=0, b=0}); end
     end
-    print("route to key #", keyno)
-    keydef.h(keyno)
+    if keydef.press then
+      keydef.press(keyno)
+    end
   else
+    if keydef.release then
+      keydef.release(keyno)
+    end
     mb.activate_leds()
   end
 end

@@ -6,16 +6,19 @@ require "snippets/multibow"
 The Keybow layout is as follows when in landscape orientation, with the USB
 cable going off "northwards":
 
-            ┋┋
-┌────┐ ┌────┐ ┌────┐ ┌────┐
-│ 11 │ │  8 │ │  5 │ │  2 │
-└────┘ └────┘ └────┘ └────┘
-┌────┐ ┌────┐ ┌────┐ ┌────┐
-│ 10 │ │  7 │ │  4 │ │  1 │
-└────┘ └────┘ └────┘ └────┘
-┌────┐ ┌────┐ ┌────┐ ┌────┐
-│  9 │ │  6 │ │  3 │ │  0 │
-└────┘ └────┘ └────┘ └────┘
+              ┋┋
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊ 11 ┊  ┊  8 ┊  ┊  5 ┊  ┊  2 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+
+╔════╗  ╔════╗  ┌╌╌╌╌┐  ╔════╗
+║ 10 ║  ║  7 ║  ┊  4 ┊  ║  1 ║
+╚════╝  ╚════╝  └╌╌╌╌┘  ╚════╝
+⏹STOP   ↺RELOAD         TSTPKG
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║  9 ║  ║  6 ║  ║  3 ║  ║  0 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+  ▮▶    ⭢STEP   ⮧INTO   ⮥OUT
 
 ]]--
 
@@ -63,12 +66,19 @@ end
 
 
 mb.register_keymap({
-  [10] = {c=RED, h=debug_stop},
-  [7] = {c=YELLOW, h=debug_restart},
-  [1] = {c=CYAN, h=go_test_package},
+  name="vsc-golang-debug",
+  [10] = {c=RED, press=debug_stop},
+  [7] = {c=YELLOW, press=debug_restart},
+  [1] = {c=CYAN, press=go_test_package},
 
-  [9] = {c=GREEN, h=debug_continue},
-  [6] = {c=BLUECYAN, h=debug_stepinto},
-  [3] = {c=BLUE, h=debug_stepover},
-  [0] = {c=BLUEGRAY, h=debug_stepout},
-}, 'vsc-golang-debug')
+  [9] = {c=GREEN, press=debug_continue},
+  [6] = {c=BLUECYAN, press=debug_stepinto},
+  [3] = {c=BLUE, press=debug_stepover},
+  [0] = {c=BLUEGRAY, press=debug_stepout},
+})
+
+mb.register_keymap({
+  name="vsc-golang-debug-shifted",
+  secondary=true,
+  [0] = {c=RED}
+})

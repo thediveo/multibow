@@ -9,10 +9,71 @@ yes, these days even keyboards run Linux...)
 
 ![Multibow on Keybow](multibow.jpg)
 
-Layouts included:
-- Debug Go programs and packages in VisualStudio Code with its Go extension.
-- "Empty" keyboard layout what does nothing, very useful when using cycling between different keyboard layouts to have one non-reacting layout.
-- permanent layout for cycling between the other layouts and for changing the keybow LED brightness.
+## Layouts
+
+### Debug Go in VisualStudio Code
+
+Debug Go programs and packages in VisualStudio Code with its Go extension.
+
+```
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊ 11 ┊  ┊  8 ┊  ┊  5 ┊  ┊  2 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+
+╔════╗  ╔════╗  ┌╌╌╌╌┐  ╔════╗
+║ 10 ║  ║  7 ║  ┊  4 ┊  ║  1 ║
+╚════╝  ╚════╝  └╌╌╌╌┘  ╚════╝
+⏹STOP   ↺RELOAD         TSTPKG
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║  9 ║  ║  6 ║  ║  3 ║  ║  0 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+  ▮▶    ⭢STEP   ⮧INTO   ⮥OUT
+```
+
+* TSTPKG activates the command "go: test package".
+
+### Kdenlive Video Editor
+
+_coming soon..._
+
+### SHIFT
+
+A SHIFT key, with Keybow LED brightness and keyboard layout cycle control.
+
+> **NOTE:** press and hold SHIFT, then use →LAYOUT and 🔆BRIGHT. The SHIFT key
+> is always active, regardless of keyboard layout. The other keys in this layout
+> only become active _while_ holding SHIFT.
+
+```
+╔════╗  ╔╌╌╌╌╗  ╔╌╌╌╌╗  ┌╌╌╌╌┐
+║ 11 ║  ┊  8 ┊  ┊  5 ┊  ┊  2 ┊
+╚════╝  ╚╌╌╌╌╝  ╚╌╌╌╌╝  └╌╌╌╌┘
+SHIFT   →LAYOUT  🔆BRIGHT
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊ 10 ┊  ┊  7 ┊  ┊  4 ┊  ┊  1 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊  9 ┊  ┊  6 ┊  ┊  3 ┊  ┊  0 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+```
+
+### Empty
+
+Just as its name says: an empty keyboard layout -- useful if you want to have
+also "no" layout active when working with multiple keyboard layouts.
+
+```
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊ 11 ┊  ┊  8 ┊  ┊  7 ┊  ┊  6 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊ 10 ┊  ┊  7 ┊  ┊  4 ┊  ┊  1 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊  9 ┊  ┊  6 ┊  ┊  3 ┊  ┊  0 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+```
 
 ## Licenses
 

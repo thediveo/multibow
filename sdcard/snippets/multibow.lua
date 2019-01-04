@@ -31,9 +31,8 @@ require(mb.path .. "routehandlers")
 
 mb.brightness = 0.4
 mb.keymaps = {}
-mb.permanent_keymaps = {}
-mb.current_keymap_set = nil
-mb.current_keymap_idx = 0
+mb.current_keymap = nil
+mb.grab_keymap = nil
 
 
 --
@@ -50,77 +49,81 @@ function mb.tap(keyno, key, ...)
 end
 
 
--- Registers a keymap by name (and optional) index. The name is simply used
--- for allowing multiple SHIFT (modifier) levels for the same keyboard layout.
--- The indices are then used to differentiate between different SHIFT/modifier
--- levels of the same keyboard layout.
+-- Registers a keymap (by name), so it can be easily activated later by its name.
+-- Multiple keymaps can be registered. Keymaps can be either "primary" by
+-- default, or permanent or secondary keymaps.
 --
--- Indices start at 0, this is the un-SHIFT-ed keymap for a layout.
+-- A primary keymap is any keymap without either a "permanent" or "secondary"
+-- table element. Users can cycle through primary keymaps using the "shift"
+-- permanent keyboard layout.
+--
+-- permanent keymaps (marked by table element "permanent=true") are always
+-- active, thus they don't need to be activated.
+--
+-- Secondary keymaps (marked by table element "secondary=true") are intended
+-- as SHIFT/modifier layers. As such the get ignored by cycling, but instead
+-- need to be activated explicitly. The "shift" permanent keyboard layout
+-- automates this.
 --
 -- If this is the first keymap getting registered, then it will also made
 -- activated.
-function mb.register_keymap(keymap, name, index)
+function mb.register_keymap(keymap)
+  local name = keymap.name
   -- register
-  local kms = mb.keymaps[name]
-  kms = kms and kms or {} -- if name isn't known yet, create new keymap array for name
-  local index = index and #kms or 0 -- appends keymap if index is nil
-  kms[index] = keymap
-  mb.keymaps[name] = kms
+  mb.keymaps[name] = keymap
   -- ensure that first registered keymap also automatically gets activated
   -- (albeit the LEDs will only update later).
-  if mb.current_keymap_set == nil then
-    mb.current_keymap_set = kms
-    mb.current_keymap_idx = index
+  if not (keymap.permanent or keymap.secondary) then
+    mb.current_keymap = mb.current_keymap or keymap
   end
 end
 
 
--- Cycles through the available (non-permanent) keymaps. When switching to
--- the next keymap, we will always activate the index 0 layout.
-function mb.cycle_keymaps()
-  local first_kms
+-- Cycles through the available (primary) keymaps, ignoring secondary and
+-- permanent keymaps. This is convenient for assigning primary keymap switching
+-- using a key on the Keybow device itself.
+function mb.cycle_primary_keymaps()
   local first_name
   local next = false
-  local next_kms
   local next_name
-  for name, kms in pairs(mb.keymaps) do
-    if first_kms == nil then
-      first_kms = kms; first_name = name
-    end
-    if kms == mb.current_keymap_set then
-      next = true
-    elseif next then
-      next_kms = kms; next_name = name
-      next = false
+  for name, keymap in pairs(mb.keymaps) do
+    if not (keymap.permanent or keymap.secondary) then
+      -- Remembers the first "primary" keymap.
+      first_name = first_name or name
+      -- Notice if we just pass the current keymap and then make sure to pick
+      -- up the following primary keymap.
+      if keymap == mb.current_keymap then
+        next = true
+      elseif next then
+        next_name = name
+        next = false
+      end
     end
   end
-  if next_kms == nil then
-    next_kms = first_kms; next_name = first_name
-  end
-  mb.activate_keymap(next_name, 0)
+  next_name = next_name or first_name
+  mb.activate_keymap(next_name)
 end
 
 
--- Activates a specific keymap by name and index.
-function mb.activate_keymap(name, index)
-  print("activate_keymap", name, index)
-  local kms = mb.keymaps[name]
-  mb.current_keymap_set = kms
-  mb.current_keymap_idx = index
-  keybow.clear_lights()
+-- Activates a specific keymap by name. Please note that it isn't necessary
+-- to "activate" permanent keymaps at all (and thus this deed cannot be done).
+function mb.activate_keymap(name)
+  local keymap = mb.keymaps[name]
+  if not keymap.permanent then
+    mb.current_keymap = keymap
+    mb.activate_leds()
+  end
+end
+
+
+--
+function mb.grab(name)
+  mb.grab_keymap = mb.keymaps[name]
   mb.activate_leds()
 end
 
-
--- Registers a permanent keymap (as opposed to switchable keymaps). As their
--- name suggest, permanent keymaps are permanently active and have priority
--- over any "standard" activated keymap. As they are permanent, there is no
--- "index" sub-layout mechanism, but instead all permanent keymaps are always
--- active. If permanent keymaps define overlapping keys, then the result is
--- undefined.
-function mb.register_permanent_keymap(keymap, name)
-  -- register
-  mb.permanent_keymaps[name] = keymap
+function mb.ungrab()
+  mb.grab_keymap = nil
   mb.activate_leds()
 end
 
@@ -138,9 +141,9 @@ end
 -- The color is a triple (table) with the elements r, g, and b. Each color
 -- component is in the range [0..1].
 function mb.led(keyno, color)
-  if color ~= nil then
-    keybow.set_pixel(keyno,
-      color.r * mb.brightness * 255, color.g * mb.brightness * 255, color.b * mb.brightness * 255)
+  if color then
+    local b = mb.brightness * 255
+    keybow.set_pixel(keyno, color.r * b, color.g * b, color.b * b)
   else
     keybow.set_pixel(keyno, 0, 0, 0)
   end
@@ -149,24 +152,41 @@ end
 
 -- Restores Keybow LEDs according to current keymap and the permanent keymaps.
 function mb.activate_leds()
-  -- current keymap
-  if mb.current_keymap_set ~= nil then
-    for keyno, keydef in pairs(mb.current_keymap_set[mb.current_keymap_idx]) do
-      print("LED", keyno)
-      mb.led(keyno, keydef.c)
+  keybow.clear_lights()
+  -- if a grab is in place then it takes absolute priority
+  if mb.grab_keymap then
+    mb.activate_keymap_leds(mb.grab_keymap)
+  else
+    -- first update LEDs for the current keymap...
+    if mb.current_keymap ~= nil then
+      mb.activate_keymap_leds(mb.current_keymap)
+    end
+    -- ...then update LEDs from permanent keymap(s), as this ensures that
+    -- the permanent keymaps take precedence.
+    for name, keymap in pairs(mb.keymaps) do
+      if keymap.permanent then
+        mb.activate_keymap_leds(keymap)
+      end
     end
   end
-  -- permanent keymap(s)
-  for name, pkm in pairs(mb.permanent_keymaps) do
-    for keyno, keydef in pairs(pkm) do
-      print("pLED", keyno)
+end
+
+
+-- Helper function that iterates over all keymap elements but skipping non-key
+-- bindings.
+function mb.activate_keymap_leds(keymap)
+  for keyno, keydef in pairs(keymap) do
+    if type(keyno) == "number" and keydef.c then
+      -- print((keymap.permanent and "permanent LED" or "LED") .. " " .. keyno)
       mb.led(keyno, keydef.c)
     end
   end
 end
 
 
--- Disables the automatic Keybow lightshow and sets the key LED colors.
+-- Disables the automatic Keybow lightshow and sets the key LED colors. This
+-- is a well-known (hook) function that gets called by the Keybow firmware
+-- after initialization immediately before waiting for key events.
 function setup()
   -- Disables the automatic keybow lightshow and switches all key LEDs off
   -- because the LEDs might be in a random state after power on.
