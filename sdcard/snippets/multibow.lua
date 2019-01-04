@@ -194,3 +194,5 @@ function setup()
   keybow.clear_lights()
   mb.activate_leds()
 end
+
+return mb
