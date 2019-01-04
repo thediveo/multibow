@@ -20,5 +20,5 @@ function keybow.set_modifier(mod, key)
   print("set_modifier " .. mod .. "," .. tostring(key))
 end
 
--- require "keys"
--- setup()
+require "keys"
+setup()
