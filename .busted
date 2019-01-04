@@ -33,8 +33,7 @@ return {
         e = "INSL = '[⛔]';"
             .. "_BUSTED = require('busted');"
             .. "function insl(f) _BUSTED.insulate(_INSL, f) end;"
-        -- Automatically pulls in our multibow mocking.
-            .. "require('mockkeybow');",
+        ,
         verbose = true
     }
 }
