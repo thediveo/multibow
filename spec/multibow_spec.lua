@@ -25,7 +25,7 @@ require "mocked-keybow"
 describe("multibow", function()
 
     -- ensure to get a fresh multibow module instance each time we run
-    -- an isolated test...
+    -- an isolated, nope, insulated test...
     local mb
 
     before_each(function()
@@ -80,12 +80,14 @@ describe("multibow", function()
     insl(function()
         it("sets up multibow, activates lights", function()
             local s = spy.on(_G, "setup")
+            local al = spy.on(mb, "activate_leds")
+            
             _G.setup()
             assert.spy(s).was.called(1)
-
-            local al = spy.on(mb, "activate_leds")
-            _G.setup()
             assert.spy(al).was.called(1)
+
+            s:revert()
+            al:revert()
         end)
     end)
 

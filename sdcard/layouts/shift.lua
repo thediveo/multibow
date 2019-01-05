@@ -46,6 +46,10 @@ SHIFT   →LAYOUT  🔆BRIGHT
 
 ]]--
 
+shift.KEY_SHIFT = 11
+shift.KEY_LAYOUT = 8
+shift.KEY_BRIGHTNESS = 5
+
 function shift.grab(key)
   mb.grab("shift-shifted")
 end
@@ -70,15 +74,15 @@ end
 shift.keymap = {
   name="shift",
   permanent=true,
-  [11] = {c={r=1, g=1, b=1}, press=shift.grab, release=shift.release},
+  [shift.KEY_SHIFT] = {c={r=1, g=1, b=1}, press=shift.grab, release=shift.release},
 }
 shift.keymap_shifted = {
   name="shift-shifted",
   secondary=true,
-  [11] = {c={r=1, g=1, b=1}, press=shift.grab, release=shift.release},
+  [shift.KEY_SHIFT] = {c={r=1, g=1, b=1}, press=shift.grab, release=shift.release},
 
-  [8] = {c={r=0, g=1, b=1}, press=shift.cycle},
-  [5] = {c={r=0.5, g=0.5, b=0.5}, press=shift.brightness}
+  [shift.KEY_LAYOUT] = {c={r=0, g=1, b=1}, press=shift.cycle},
+  [shift.KEY_BRIGHTNESS] = {c={r=0.5, g=0.5, b=0.5}, press=shift.brightness}
 }
 
 mb.register_keymap(shift.keymap)
