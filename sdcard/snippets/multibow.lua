@@ -20,9 +20,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
+mb = {} -- module
+
 require "keybow"
 
-mb = {}
 mb.path = (...):match("^(.-)[^%/]+$")
 
 require(mb.path .. "morekeys")
@@ -76,6 +77,17 @@ function mb.register_keymap(keymap)
   if not (keymap.permanent or keymap.secondary) then
     mb.current_keymap = mb.current_keymap or keymap
   end
+end
+
+
+-- Returns the list of currently registered keymaps; this list is a table,
+-- with its registered keymaps at indices 1, 2, ...
+function mb.registered_keymaps()
+  local keymaps = {}
+  for name, keymap in pairs(mb.keymaps) do
+    table.insert(keymaps, keymap)
+  end
+  return keymaps
 end
 
 
@@ -195,4 +207,4 @@ function setup()
   mb.activate_leds()
 end
 
-return mb
+return mb -- module

@@ -30,7 +30,6 @@ describe("multibow", function()
 
     before_each(function()
         require("keybow")
-        stub(keybow, "set_pixel")
         mb = require("snippets/multibow")
     end)
 
@@ -87,6 +86,13 @@ describe("multibow", function()
             local al = spy.on(mb, "activate_leds")
             _G.setup()
             assert.spy(al).was.called(1)
+        end)
+    end)
+
+    insl(function()
+        it("has more keys", function()
+            assert.is_not_nil(keybow.F13)
+            assert.is.equal(keybow.F13, 0x68)
         end)
     end)
 

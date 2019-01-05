@@ -1,6 +1,3 @@
--- An empty Multibow Keybow layout. Useful for "switching off" any active
--- keymaps, with only the permanent keymaps (SHIFT, etc) being still in place.
-
 --[[
 Copyright 2019 Harald Albrecht
 
@@ -23,28 +20,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-local empty = {} -- module
+require "mocked-keybow"
 
-local mb = require("snippets/multibow")
+describe("empty multibow keymap", function()
 
---[[
-The Keybow layout is as follows when in landscape orientation, with the USB
-cable going off "northwards":
+    local mb = require("snippets/multibow")
 
-              ┋┋
-┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
-┊ 11 ┊  ┊  8 ┊  ┊  7 ┊  ┊  6 ┊
-└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
-┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
-┊ 10 ┊  ┊  7 ┊  ┊  4 ┊  ┊  1 ┊
-└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
-┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
-┊  9 ┊  ┊  6 ┊  ┊  3 ┊  ┊  0 ┊
-└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+    insl(function()
+        it("installs a single empty primary keymap", function()
+            -- Sanity check that there are no registered keymaps yet.
+            assert.is.equal(#mb.registered_keymaps(), 0)
+            
+            local empty = require("layouts/empty")
+            assert.is_not_nil(empty) -- we're going over the top here...
+            assert.is_not_nil(empty.keymap) -- ...even more so.
+            
+            -- empty must register exactly one keymap, and it must be
+            -- a primary keymap, not permanent or secondary.
+            local kms = mb.registered_keymaps()
+            assert.is.equal(#kms, 1)
+            local keymap = kms[1]
+            assert.is_falsy(keymap.permanent)
+            assert.is_falsy(keymap.secondary)
+        end)
+    end)
 
-]]--
-
-empty.keymap = {name="empty"}
-mb.register_keymap(empty.keymap)
-
-return empty -- module
+end)

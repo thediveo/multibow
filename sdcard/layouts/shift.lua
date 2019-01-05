@@ -22,7 +22,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-require "snippets/multibow"
+local shift = {} -- module
+
+local mb = require "snippets/multibow"
 
 --[[
 The Keybow layout is as follows when in landscape orientation, with the USB
@@ -44,8 +46,6 @@ SHIFT   →LAYOUT  🔆BRIGHT
 
 ]]--
 
-shift = {}
-
 function shift.grab(key)
   mb.grab("shift-shifted")
 end
@@ -55,28 +55,33 @@ function shift.release(key)
 end
 
 function shift.cycle(key)
-  print("CYCLE")
   mb.cycle_primary_keymaps()
 end
 
 function shift.brightness(key)
-  print("BRIGHTNESS")
   local b = mb.brightness + 0.3
   if b > 1 then; b = 0.4; end
   mb.set_brightness(b)
 end
 
-mb.register_keymap({
+
+-- define and register keymaps
+
+shift.keymap = {
   name="shift",
   permanent=true,
   [11] = {c={r=1, g=1, b=1}, press=shift.grab, release=shift.release},
-})
-
-mb.register_keymap({
+}
+shift.keymap_shifted = {
   name="shift-shifted",
   secondary=true,
   [11] = {c={r=1, g=1, b=1}, press=shift.grab, release=shift.release},
 
   [8] = {c={r=0, g=1, b=1}, press=shift.cycle},
   [5] = {c={r=0.5, g=0.5, b=0.5}, press=shift.brightness}
-})
+}
+
+mb.register_keymap(shift.keymap)
+mb.register_keymap(shift.keymap_shifted)
+
+return shift -- module

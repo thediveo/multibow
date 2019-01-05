@@ -6,7 +6,11 @@
 	],
 	"settings": {
 		"files.associations": {
-			".busted": "lua"
-		}
+			".busted": "lua",
+			".luacheckrc": "lua"
+		},
+		"lua.format.lineWidth": 80,
+		"lua.luacheckPath": "luacheck",
+		"lua.preferLuaCheckErrors": true
 	}
 }
