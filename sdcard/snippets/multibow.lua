@@ -113,7 +113,9 @@ function mb.cycle_primary_keymaps()
     end
   end
   next_name = next_name or first_name
-  mb.activate_keymap(next_name)
+  if first_name then
+    mb.activate_keymap(next_name)
+  end
 end
 
 
@@ -121,7 +123,7 @@ end
 -- to "activate" permanent keymaps at all (and thus this deed cannot be done).
 function mb.activate_keymap(name)
   local keymap = mb.keymaps[name]
-  if not keymap.permanent then
+  if keymap and not keymap.permanent then
     mb.current_keymap = keymap
     mb.activate_leds()
   end
