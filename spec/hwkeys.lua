@@ -1,3 +1,7 @@
+-- Stimulates Keybow "hardware key" presses and releases at the Keybow handler
+-- level, thus involving everything starting with the Keybow "firmware" key
+-- Lua handlers handle_key_xx.
+
 --[[
 Copyright 2019 Harald Albrecht
 
@@ -20,16 +24,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-local kbh = require("spec/keybowhandler")
-local mb = require("snippets/multibow")
-local k = require("layouts/kdenlive")
+hwk = {} -- module
 
+-- Convenience: returns the name of a Keybow key handler function for the
+-- given key number.
+function hwk.handler_name(keyno)
+    return string.format("handle_key_%02d", keyno)
+end
 
-describe("Kdenlive keymap", function()
+-- Convenience: call Keybow key handler for key presses and releases by key
+-- number instead of name.
+function hwk.press(keyno)
+    _G[hwk.handler_name(keyno)](true)
+end
 
-    it("...", function()
-        local kms = mb.registered_keymaps()
-        assert.is.equal(#kms, 2)
-    end)
+function hwk.release(keyno)
+    _G[hwk.handler_name(keyno)](false)
+end
 
-end)
+-- Convenience: taps a Keybow key, triggering the corresponding key handler
+-- twice.
+function hwk.tap(keyno)
+    hwk.press(keyno)
+    hwk.release(keyno)
+end
+
+return hwk -- module

@@ -22,7 +22,7 @@ SOFTWARE.
 
 require "mocked-keybow"
 require "snippets/multibow"
-local kbh = require("spec/keybowhandler")
+local hwk = require("spec/hwkeys")
 local mb = require("snippets/multibow")
 
 describe("SHIFT multibow keymap", function()
@@ -83,14 +83,14 @@ describe("SHIFT multibow keymap", function()
                 spy.on(mb, "ungrab")
 
                 -- route in the SHIFT permanent keymap
-                kbh.handle_key(shift.KEY_SHIFT, true)
+                hwk.press(shift.KEY_SHIFT)
                 assert.spy(mb.grab).was.called(1)
                 assert.spy(mb.grab).was.called_with(shift.keymap_shifted.name)
 
                 -- route in the shifted(!) SHIFT keymap, so this checks
                 -- that we ungrab correctly
                 mb.grab:clear()
-                kbh.handle_key(shift.KEY_SHIFT, false)
+                hwk.release(shift.KEY_SHIFT)
                 assert.spy(mb.grab).was_not.called()
                 assert.spy(mb.ungrab).was.called(1)
 
@@ -104,7 +104,7 @@ describe("SHIFT multibow keymap", function()
                 stub(shift, "shift_secondary_keymap")
 
                 -- test that lonely SHIFT triggers...
-                kbh.tap(shift.KEY_SHIFT)
+                hwk.tap(shift.KEY_SHIFT)
                 assert.stub(shift.shift_secondary_keymap).was.called(1)
 
                 -- but that SHIFT followed by another function doesn't shift.
@@ -113,9 +113,9 @@ describe("SHIFT multibow keymap", function()
                     shift.KEY_LAYOUT,
                     shift.KEY_BRIGHTNESS
                 }) do
-                    kbh.handle_key(shift.KEY_SHIFT, true)
-                    kbh.tap(key)
-                    kbh.handle_key(shift.KEY_SHIFT, false)
+                    hwk.press(shift.KEY_SHIFT)
+                    hwk.tap(key)
+                    hwk.release(shift.KEY_SHIFT)
                     assert.stub(shift.shift_secondary_keymap).was_not.called()
                 end
             end)
@@ -137,10 +137,10 @@ describe("SHIFT multibow keymap", function()
 
                 spy.on(mb, "activate_keymap")
 
-                kbh.tap(shift.KEY_SHIFT)
+                hwk.tap(shift.KEY_SHIFT)
                 assert.spy(mb.activate_keymap).was.called_with(keymap_shifted.name)
                 assert.is.equal(mb.current_keymap, keymap_shifted)
-                kbh.tap(shift.KEY_SHIFT)
+                hwk.tap(shift.KEY_SHIFT)
                 assert.is.equal(mb.current_keymap, keymap)
 
                 mb.activate_keymap:revert()
@@ -151,17 +151,17 @@ describe("SHIFT multibow keymap", function()
             describe("while SHIFTed", function()
 
                 before_each(function()
-                    kbh.handle_key(shift.KEY_SHIFT, true)
+                    hwk.press(shift.KEY_SHIFT)
                 end)
 
                 after_each(function()
-                    kbh.handle_key(shift.KEY_SHIFT, false)
+                    hwk.release(shift.KEY_SHIFT)
                 end)
 
                 it("cycles primary keymaps", function()
                     stub(mb, "cycle_primary_keymaps")
 
-                    kbh.tap(shift.KEY_LAYOUT)
+                    hwk.tap(shift.KEY_LAYOUT)
                     assert.stub(mb.cycle_primary_keymaps).was.called(1)
 
                     mb.cycle_primary_keymaps:revert()
@@ -170,8 +170,8 @@ describe("SHIFT multibow keymap", function()
                 it("changes brightness", function()
                     stub(mb, "set_brightness")
 
-                    kbh.tap(shift.KEY_BRIGHTNESS)
-                    kbh.tap(shift.KEY_BRIGHTNESS)
+                    hwk.tap(shift.KEY_BRIGHTNESS)
+                    hwk.tap(shift.KEY_BRIGHTNESS)
                     assert.stub(mb.set_brightness).was.called(2)
 
                     mb.set_brightness:revert()

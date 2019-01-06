@@ -33,6 +33,7 @@ return {
         e = "INSL = '[⛔]';"
             .. "_BUSTED = require('busted');"
             .. "function insl(f) _BUSTED.insulate(_INSL, f) end;"
+            .. "function inslit(d, f) _BUSTED.insulate(_INSL, function() _BUSTED.it(d, f) end) end;"
         ,
         verbose = true
     }

@@ -21,7 +21,7 @@ SOFTWARE.
 ]]--
 
 require "mocked-keybow"
-local kbh = require("spec/keybowhandler")
+local hwk = require("spec/hwkeys")
 
 describe("routehandlers", function()
 
@@ -86,11 +86,11 @@ describe("routehandlers", function()
             stub(mb, "route")
             for keyno = 0, 11 do
                 mb.route:clear()
-                kbh.handle_key(keyno, true)
+                hwk.press(keyno)
                 assert.stub(mb.route).was.called(1)
                 assert.stub(mb.route).was.called_with(keyno, true)
                 mb.route:clear()
-                kbh.handle_key(keyno, false)
+                hwk.release(keyno)
                 assert.stub(mb.route).was.called(1)
                 assert.stub(mb.route).was.called_with(keyno, false)
             end
@@ -102,8 +102,8 @@ describe("routehandlers", function()
     insl(function()
 
         it("doesn't fail for unroutable keys", function()
-            kbh.handle_key(0, true)
-            kbh.handle_key(0, false)
+            hwk.press(0)
+            hwk.release(0)
         end)
 
         -- start with secondary keymap only :)
@@ -113,14 +113,14 @@ describe("routehandlers", function()
             mb.register_keymap(secondary_keymap)
 
             assert.spy(spies.sec_key_press).was_not.called() -- just a safety guard
-            kbh.handle_key(0, true)
+            hwk.press(0)
             assert.spy(spies.sec_key_press).was_not.called()
         end)
 
         it("routes key press to activated secondary keymap", function()
             mb.activate_keymap(secondary_keymap.name)
 
-            kbh.handle_key(0, true)
+            hwk.press(0)
             assert.spy(spies.sec_key_press).was.called(1)
             assert.spy(spies.sec_key_press).was.called_with(0)
         end)
@@ -132,7 +132,7 @@ describe("routehandlers", function()
             mb.activate_keymap(primary_keymap.name)
 
             assert.spy(spies.prim_key_press).was_not.called() -- just a safety guard
-            kbh.handle_key(0, true)
+            hwk.press(0)
             assert.spy(spies.prim_key_press).was.called(1)
             assert.spy(spies.prim_key_press).was.called_with(0)
             assert.spy(spies.prim_key_release).was_not.called()
@@ -140,7 +140,7 @@ describe("routehandlers", function()
 
         it("routes key release to primary keymap", function()
             assert.spy(spies.prim_key_press).was_not.called() -- just a safety guard
-            kbh.handle_key(0, false)
+            hwk.release(0)
             assert.spy(spies.prim_key_press).was_not.called()
             assert.spy(spies.prim_key_release).was.called(1)
             assert.spy(spies.prim_key_release).was.called_with(0)
@@ -152,7 +152,7 @@ describe("routehandlers", function()
             assert.is_not_truthy(permanent_keymap.secondary)
             mb.register_keymap(permanent_keymap)
 
-            kbh.handle_key(0, true)
+            hwk.press(0)
             assert.spy(spies.perm_key_press).was.called(1)
             assert.spy(spies.perm_key_press).was.called_with(0)
             assert.spy(spies.perm_key_release).was_not.called()
@@ -162,7 +162,7 @@ describe("routehandlers", function()
 
         it("correctly routes key press to un-overlaid primary key 2", function()
             assert.spy(spies.prim_otherkey_press).was_not_called()
-            kbh.handle_key(1, true)
+            hwk.press(1)
             assert.spy(spies.prim_otherkey_press).was.called(1)
             assert.spy(spies.prim_otherkey_press).was.called_with(1)
         end)
@@ -173,13 +173,13 @@ describe("routehandlers", function()
             mb.grab(grab_keymap.name)
 
             assert.spy(spies.grab_key_press).was.called(0)
-            kbh.handle_key(0, true)
+            hwk.press(0)
             assert.spy(spies.grab_key_press).was.called(1)
             assert.spy(spies.grab_key_press).was.called_with(0)
 
             spies.grab_key_press:clear()
             mb.ungrab()
-            kbh.handle_key(0, true)
+            hwk.press(0)
             assert.spy(spies.grab_key_press).was.called(0)
             assert.spy(spies.perm_key_press).was.called(1)
             assert.spy(spies.prim_key_press).was.called(0)

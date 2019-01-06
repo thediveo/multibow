@@ -11,3 +11,5 @@ busted.stub(keybow, "tap_key")
 
 busted.stub(keybow, "sleep") -- FIXME
 busted.stub(keybow, "usleep") -- FIXME
+
+return keybow

@@ -20,24 +20,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-kbh = {} -- module
+local hwk = require("spec/hwkeys")
+local mb = require("snippets/multibow")
+local k = require("layouts/kdenlive")
 
--- Convenience: returns the name of a Keybow key handler function.
-function kbh.handler_name(keyno)
-    return string.format("handle_key_%02d", keyno)
-end
 
--- Convenience: calls Keybow key handler by key number instead of name.
-function kbh.handle_key(keyno, pressed)
-    _G[kbh.handler_name(keyno)](pressed)
-end
+describe("Kdenlive keymap", function()
 
--- Convenience: taps a Keybow key, triggering the corresponding key handler
--- twice.
-function kbh.tap(keyno)
-    local h = _G[kbh.handler_name(keyno)]
-    h(true)
-    h(false)
-end
+    it("...", function()
+        local kms = mb.registered_keymaps()
+        assert.is.equal(2, #kms)
+    end)
 
-return kbh -- module
+end)

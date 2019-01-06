@@ -20,25 +20,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-local kbh = require("spec/keybowhandler")
+local hwk = require("spec/hwkeys")
 
-describe("Keybow keyhandler", function()
+describe("Keybow hardware key handler module", function()
 
     it("returns proper Keybow handler name", function()
-        assert.equals(kbh.handler_name(0), "handle_key_00")
+        assert.equals(hwk.handler_name(0), "handle_key_00")
     end)
 
-    it("calls correct Keybow key handler", function()
-        stub(_G, "handle_key_00")
+    inslit("calls correct Keybow key handler", function()
+        stub(_G, "handle_key_00") -- note: no need to revert later due to insulation.
         stub(_G, "handle_key_01")
 
-        kbh.handle_key(0, true)
+        hwk.press(0)
         assert.stub(handle_key_00).was.called(1)
         assert.stub(handle_key_00).was.called_with(true)
         assert.stub(handle_key_01).was_not.called()
-
-        handle_key_00:revert()
-        handle_key_01:revert()
     end)
 
     describe("wrapped Keybow key handler 00", function()
@@ -58,10 +55,11 @@ describe("Keybow keyhandler", function()
             _G.handle_key_00 = old
         end)
 
-        it("taps Keybow key handlers", function()
-            kbh.tap(0)
-            assert.equals(#seq, 2)
-            assert.same(seq, {true, false})
+        it("taps Keybow key handler with press and release", function()
+            -- this also implicitly tests hwk.press() and hw.release()
+            hwk.tap(0)
+            assert.equals(2, #seq)
+            assert.same({true, false}, seq)
         end)
     
     end)
