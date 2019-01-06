@@ -24,7 +24,7 @@ SOFTWARE.
 -- their correct handlers, depending on which keyboard layout currently
 -- is active.
 function mb.route(keyno, pressed)
-    local keydef, grabbed_any_keydef
+    local keydef, grabbed_any_keydef, anykdeydef
     -- Checks for a keymap grab being enforced at this time...
     if mb.grab_keymap then
         keydef = mb.grab_keymap[keyno]
@@ -40,13 +40,16 @@ function mb.route(keyno, pressed)
             end
         end
         -- Checks for key in current keymap if no persistent key was found yet.
-        if not keydef and mb.current_keymap then
-          keydef = mb.current_keymap[keyno]
+        if not keydef then
+            if mb.current_keymap then
+                keydef = mb.current_keymap[keyno]
+                anykeydef = mb.current_keymap[-1]
+            end
         end
     end
 
     -- Bails out if no key definition to route to could be found.
-    if not (keydef or grabbed_any_keydef) then
+    if not (keydef or anykeydef or grabbed_any_keydef) then
         return
     end
 
@@ -64,6 +67,9 @@ function mb.route(keyno, pressed)
         if keydef and keydef.press then
             keydef.press(keyno)
         end
+        if anykeydef and anykeydef.press then
+            anykeydef.press(keyno)
+        end
     else
         if grabbed_any_keydef and grabbed_any_keydef.release then
             grabbed_any_keydef.release(keyno)
@@ -71,7 +77,10 @@ function mb.route(keyno, pressed)
         if keydef and keydef.release then
             keydef.release(keyno)
         end
-          mb.activate_leds()
+        if anykeydef and anykeydef.release then
+            anykeydef.release(keyno)
+        end
+        mb.activate_leds()
     end
 end
 

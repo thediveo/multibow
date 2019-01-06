@@ -37,17 +37,23 @@ describe("Kdenlive keymap", function()
 
     describe("with setup", function()
 
-        local hwk, mb, k
+        local mb, shift, k
 
         before_each(function()
             mb = require("snippets/multibow")
-            require("layouts/shift")
+            shift = require("layouts/shift")
             k = require("layouts/kdenlive")
             _G.setup()
         end)
 
         inslit("", function()
             assert.is.equal(k.keymap.name, mb.current_keymap.name)
+            hwk.tap(shift.KEY_SHIFT)
+            assert.is.equal(k.keymap_shifted.name, mb.current_keymap.name)
+            hwk.tap(0) -- FIXME
+            assert.is.equal(k.keymap.name, mb.current_keymap.name)
+            hwk.tap(shift.KEY_SHIFT)
+            assert.is.equal(k.keymap_shifted.name, mb.current_keymap.name)
         end)
 
     end)

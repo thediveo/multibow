@@ -28,6 +28,12 @@ local k = _G.kdenlive or {} -- module
 local mb = require "snippets/multibow"
 
 
+-- Unshift to primary keymap. For simplification, use it with the "anykey"
+-- release handlers, see below.
+function k.unshift()
+    mb.activate_keymap(k.keymap.name)
+end
+
 -- Key colors for unshifted and shifted keys; keep them rather muted in order
 -- to not distract your video editing work.
 k.UNSHIFTED_COLOR = {r=0, g=1, b=0}
@@ -40,6 +46,7 @@ k.keymap = {
 k.keymap_shifted = {
     name="kdenlive-shifted",
     secondary=true,
+    [-1] = {release=k.unshift},
     [6] = {c=k.SHIFTED_COLOR},
     [3] = {c=k.SHIFTED_COLOR},
 }
