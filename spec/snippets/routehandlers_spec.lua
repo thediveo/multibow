@@ -62,6 +62,7 @@ describe("routehandlers", function()
     }
     local grab_keymap = {
         name="grab",
+        [-1]={press=spies.grab_key_press, release=spies.grab_key_release},
         [0]={press=spies.grab_key_press, release=spies.grab_key_release}
     }
 
@@ -172,10 +173,17 @@ describe("routehandlers", function()
             mb.register_keymap(grab_keymap)
             mb.grab(grab_keymap.name)
 
+            -- grab routes to grab handler *AND* grab any handler
             assert.spy(spies.grab_key_press).was.called(0)
             hwk.press(0)
-            assert.spy(spies.grab_key_press).was.called(1)
+            -- remember: this grab has an "any" handler
+            assert.spy(spies.grab_key_press).was.called(2)
             assert.spy(spies.grab_key_press).was.called_with(0)
+
+            spies.grab_key_press:clear()
+            hwk.press(1)
+            assert.spy(spies.grab_key_press).was.called(1)
+            assert.spy(spies.grab_key_press).was.called_with(1)
 
             spies.grab_key_press:clear()
             mb.ungrab()

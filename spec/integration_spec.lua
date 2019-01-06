@@ -36,7 +36,9 @@ local hwk = require("spec/hwkeys")
 
 describe("final Multibow integration", function()
 
-    it("correctly integrates", function()
+    _G.setup()
+
+    it("integrates all keymaps", function()
         local kms = mb.registered_keymaps()
         -- shift: 2 registered keymaps
         -- vsc-golang: 1 reg keymap

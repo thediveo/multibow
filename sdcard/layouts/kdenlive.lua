@@ -28,21 +28,20 @@ local k = _G.kdenlive or {} -- module
 local mb = require "snippets/multibow"
 
 
-
-k = {} -- module
-
 -- Key colors for unshifted and shifted keys; keep them rather muted in order
 -- to not distract your video editing work.
-k.UNSHIFTED_COLOR = {r=0, g=50, b=0}
-k.SHIFTED_COLOR = {r=50, g=0, b=0}
+k.UNSHIFTED_COLOR = {r=0, g=1, b=0}
+k.SHIFTED_COLOR = {r=1, g=0, b=0}
 k.keymap = {
     name="kdenlive",
-    [9] = {c={0,1,0}}
+    [9] = {c=k.UNSHIFTED_COLOR},
+    [6] = {c=k.UNSHIFTED_COLOR},
 }
 k.keymap_shifted = {
     name="kdenlive-shifted",
     secondary=true,
-    [9] = {c={1,0,0}}
+    [6] = {c=k.SHIFTED_COLOR},
+    [3] = {c=k.SHIFTED_COLOR},
 }
 k.keymap.shift_to = k.keymap_shifted
 k.keymap_shifted.shift_to = k.keymap

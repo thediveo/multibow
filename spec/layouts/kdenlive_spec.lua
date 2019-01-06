@@ -20,16 +20,36 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
+require "mocked-keybow"
 local hwk = require("spec/hwkeys")
-local mb = require("snippets/multibow")
-local k = require("layouts/kdenlive")
 
 
 describe("Kdenlive keymap", function()
 
     it("...", function()
+        local mb = require("snippets/multibow")
+        local k = require("layouts/kdenlive")
+        assert.is.equal(k.keymap.name, mb.current_keymap.name)
+ 
         local kms = mb.registered_keymaps()
         assert.is.equal(2, #kms)
+    end)
+
+    describe("with setup", function()
+
+        local hwk, mb, k
+
+        before_each(function()
+            mb = require("snippets/multibow")
+            require("layouts/shift")
+            k = require("layouts/kdenlive")
+            _G.setup()
+        end)
+
+        inslit("", function()
+            assert.is.equal(k.keymap.name, mb.current_keymap.name)
+        end)
+
     end)
 
 end)

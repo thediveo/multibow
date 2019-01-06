@@ -24,10 +24,11 @@ SOFTWARE.
 -- their correct handlers, depending on which keyboard layout currently
 -- is active.
 function mb.route(keyno, pressed)
-    local keydef
+    local keydef, grabbed_any_keydef
     -- Checks for a keymap grab being enforced at this time...
     if mb.grab_keymap then
         keydef = mb.grab_keymap[keyno]
+        grabbed_any_keydef = mb.grab_keymap[-1]
     else
         -- Checks for key in permanent keymaps first...
         for name, keymap in pairs(mb.keymaps) do
@@ -45,7 +46,7 @@ function mb.route(keyno, pressed)
     end
 
     -- Bails out if no key definition to route to could be found.
-    if not keydef then
+    if not (keydef or grabbed_any_keydef) then
         return
     end
 
@@ -57,11 +58,17 @@ function mb.route(keyno, pressed)
                 mb.led(led, {r = 0, g = 0, b = 0})
             end
         end
-        if keydef.press then
+        if grabbed_any_keydef and grabbed_any_keydef.press then
+            grabbed_any_keydef.press(keyno)
+        end
+        if keydef and keydef.press then
             keydef.press(keyno)
         end
     else
-        if keydef.release then
+        if grabbed_any_keydef and grabbed_any_keydef.release then
+            grabbed_any_keydef.release(keyno)
+        end
+        if keydef and keydef.release then
             keydef.release(keyno)
         end
           mb.activate_leds()

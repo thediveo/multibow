@@ -38,7 +38,7 @@ describe("empty multibow keymap", function()
             -- empty must register exactly one keymap, and it must be
             -- a primary keymap, not permanent or secondary.
             local kms = mb.registered_keymaps()
-            assert.is.equal(#kms, 1)
+            assert.is.equal(1, #kms)
             local keymap = kms[1]
             assert.is_falsy(keymap.permanent)
             assert.is_falsy(keymap.secondary)

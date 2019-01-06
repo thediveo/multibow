@@ -59,11 +59,10 @@ shift.KEY_BRIGHTNESS = shift.KEY_BRIGHTNESS or 5
 -- Internal flag for detecting SHIFT press-release sequences without any SHIFTed
 -- function.
 local shift_only = false
-local in_shift = false
-local other_key = false
+local grabbed_key_count = 0
 
 
--- Switch to the next SHIFT layer within the currently active keyboard layout.
+-- Switches to the next SHIFT layer within the currently active keyboard layout.
 -- SHIFT layer(s) are wired up as a circular list of keymaps, linked using their
 -- "shift_to" elements.
 function shift.shift_secondary_keymap()
@@ -74,40 +73,42 @@ function shift.shift_secondary_keymap()
 end
 
 
-function shift.release_other()
-    other_key = false
-    if not in_shift then
-        mb.ungrab()
+-- Remember how many grabbed keys are pressed, so we won't ungrab later until
+-- all keys have been released.
+function shift.any_press(keyno)
+    grabbed_key_count = grabbed_key_count + 1
+end
+
+-- Only ungrab after last key has been released
+function shift.any_release(keyno)
+    if grabbed_key_count > 0 then
+        grabbed_key_count = grabbed_key_count - 1
+        if grabbed_key_count == 0 then
+            -- Ungrabs after last key released.
+            mb.ungrab()
+            -- And switches between keymaps within the same set.
+            if shift_only then
+                shift.shift_secondary_keymap()
+            end
+        end
     end
 end
 
 
--- SHIFT press: switches into grabbed SHIFT mode, activating brightness change,
--- keymap cycling, et cetera.
-function shift.grab(key)
-    mb.grab("shift-shifted")
-    in_shift = true
-    other_key = false -- play safe.
+-- SHIFT press: switches into grabbed SHIFT mode, activating the in-SHIFT keys
+-- for brightness change, keymap cycling, et cetera.
+function shift.shift(key)
+    grabbed_keys = 1 -- includes myself; this is necessary as the grab "any"
+                     -- handler will not register the SHIFT press, because it
+                     -- wasn't grabbed yet.
     shift_only = true
-end
-
-
--- SHIFT release: leaves (grabbed) SHIFT mode, but only if there is no other
--- (bound) key currently being held.
-function shift.release(key)
-    in_shift = false
-    if not other_key then
-        mb.ungrab()
-    end
-    if shift_only then
-        shift.shift_secondary_keymap()
-    end
+    shift.any_press(key)
+    mb.grab(shift.keymap_shifted.name)
 end
 
 
 -- Cycles to the next primary keyboard layout (keymap)
 function shift.cycle(key)
-    other_key = true
     shift_only = false
     mb.cycle_primary_keymaps()
 end
@@ -116,7 +117,6 @@ end
 -- Changes the Keybow LED brightness, by cycling through different brightness
 -- levels
 function shift.brightness(key)
-    other_key = true
     shift_only = false
     local b = mb.brightness + 0.3
     if b > 1 then; b = 0.4; end
@@ -129,12 +129,13 @@ end
 shift.keymap = {
   name="shift",
   permanent=true,
-  [shift.KEY_SHIFT] = {c={r=1, g=1, b=1}, press=shift.grab, release=shift.release},
+  [shift.KEY_SHIFT] = {c={r=1, g=1, b=1}, press=shift.shift},
 }
 shift.keymap_shifted = {
   name="shift-shifted",
   secondary=true,
-  [shift.KEY_SHIFT] = {c={r=1, g=1, b=1}, press=shift.grab, release=shift.release},
+  [-1] = {press=shift.any_press, release=shift.any_release},
+  [shift.KEY_SHIFT] = {c={r=1, g=1, b=1}},
 
   [shift.KEY_LAYOUT] = {c={r=0, g=1, b=1}, press=shift.cycle, release=shift.release_other},
   [shift.KEY_BRIGHTNESS] = {c={r=0.5, g=0.5, b=0.5}, press=shift.brightness, release=shift.release_other}
