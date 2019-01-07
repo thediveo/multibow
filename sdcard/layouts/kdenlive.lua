@@ -25,37 +25,43 @@ SOFTWARE.
 -- below.
 local k = _G.kdenlive or {} -- module
 
-local mb = require "snippets/multibow"
+require("keybow")
+local mk = require("snippets/morekeys")
+local mb = require("snippets/multibow")
+
+
+k.KEY_CLIP_BEGIN = k.KEY_CLIP_BEGIN or 9
+k.KEY_PROJECT_BEGIN = k.KEY_PROJECT_BEGIN or 9
+
+k.KEY_CLIP_END = k.KEY_CLIP_END or 0
+k.KEY_PROJECT_END = k.KEY_PROJECT_END or 0
+
+-- (Default) key colors for unshifted and shifted keys.
+k.COLOR_UNSHIFTED = k.COLOR_UNSHIFTED or {r=0, g=1, b=0}
+k.COLOR_SHIFTED = k.COLOR_SHIFTED or {r=1, g=0, b=0}
 
 
 -- Unshift to primary keymap. For simplification, use it with the "anykey"
 -- release handlers, see below.
 function k.unshift(keyno)
-    if keyno == 11 then 
-        print(debug.traceback())
-    else
-        mb.activate_keymap(k.keymap.name)
-    end
+    mb.activate_keymap(k.keymap.name)
 end
 
--- Key colors for unshifted and shifted keys; keep them rather muted in order
--- to not distract your video editing work.
-k.UNSHIFTED_COLOR = {r=0, g=1, b=0}
-k.SHIFTED_COLOR = {r=1, g=0, b=0}
 k.keymap = {
     name="kdenlive",
-    [9] = {c=k.UNSHIFTED_COLOR},
-    [6] = {c=k.UNSHIFTED_COLOR},
+    [k.KEY_CLIP_BEGIN] = {c=k.COLOR_UNSHIFTED, press=function() mb.tap(mk.HOME) end},
+    [k.KEY_CLIP_END] = {c=k.COLOR_UNSHIFTED, press=function() mb.tap(mk.END) end},
 }
 k.keymap_shifted = {
     name="kdenlive-shifted",
     secondary=true,
+    [k.KEY_PROJECT_BEGIN] = {c=k.COLOR_SHIFTED, press=function() mb.tap(mk.HOME, keybow.LEFT_CTRL) end},
+    [k.KEY_PROJECT_END] = {c=k.COLOR_SHIFTED, press=function() mb.tap(mk.END, keybow.LEFT_CTRL) end},
     [-1] = {release=k.unshift},
-    [6] = {c=k.SHIFTED_COLOR},
-    [3] = {c=k.SHIFTED_COLOR},
 }
 k.keymap.shift_to = k.keymap_shifted
 k.keymap_shifted.shift_to = k.keymap
+
 mb.register_keymap(k.keymap)
 mb.register_keymap(k.keymap_shifted)
 

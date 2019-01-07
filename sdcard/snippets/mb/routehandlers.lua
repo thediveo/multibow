@@ -1,3 +1,5 @@
+-- Part of Multibow
+
 --[[
 Copyright 2019 Harald Albrecht
 

@@ -1,4 +1,4 @@
--- Configuration for "busted" TDD tool
+-- Part of Multibow
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -22,20 +22,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-return {
-    default = {
-        lpath = "./sdcard/?.lua;./mock/?.lua",
-        -- Provides an "insl" convenience replacement for busted's insulate() using
-        -- a fixed descriptive text ... or rather, icon. Please not that "insl"
-        -- not only rhymes with "insulation", but even more so with the German
-        -- "insel", meaning "island". And that's exactly what it does: splendid
-        -- isolation...
-        e = "INSL = '[⛔]';"
-            .. "_BUSTED = require('busted');"
-            .. "function insl(f) _BUSTED.insulate(_INSL, f) end;"
-            .. "function inslit(d, f) _BUSTED.insulate(_INSL, function() _BUSTED.it(d, f) end) end;"
-        ,
-        verbose = true,
-        recursive = true
-    }
-}
+-- Sends a single key tap to the USB host, optionally with modifier keys, such
+-- as SHIFT (keybow.LEFT_SHIFT), CTRL (keybow.LEFT_CTRL), et cetera. The "key"
+-- parameter can be a string or a Keybow key code, such as keybow.HOME, et
+-- cetera.
+function mb.tap(key, ...)
+    mb.tap_times(key, 1, ...)
+end
+
+-- Taps the same key multiple times...
+function mb.tap_times(key, times, ...)
+    for modifier_argno = 1, select("#", ...) do
+        local modifier = select(modifier_argno, ...)
+        if modifier then; keybow.set_modifier(modifier, keybow.KEY_DOWN); end
+      end
+      for tap = 1, times do
+        keybow.tap_key(key)
+        keybow.sleep(100)
+    end
+    for modifier_argno = 1, select("#", ...) do
+        local modifier = select(modifier_argno, ...)
+        if modifier then; keybow.set_modifier(modifier, keybow.KEY_UP); end
+      end
+  end
+  

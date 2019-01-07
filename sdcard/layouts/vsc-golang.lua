@@ -20,7 +20,7 @@ cable going off "northwards":
 ╔════╗  ╔════╗  ╔════╗  ╔════╗
 ║  9 ║  ║  6 ║  ║  3 ║  ║  0 ║
 ╚════╝  ╚════╝  ╚════╝  ╚════╝
-  ▮▶    ⭢STEP   ⮧INTO   ⮥OUT
+  ▮▶    ⮧INTO   ⭢STEP   ⮥OUT
 
 ]]--
 
@@ -33,13 +33,21 @@ vscgo.KEY_STEPINTO = vscgo.KEY_STEPINTO or 6
 vscgo.KEY_STEPOVER = vscgo.KEY_STEPOVER or 3
 vscgo.KEY_STEPOUT = vscgo.KEY_STEPOUT or 0
 
-RED = { r=1, g=0, b=0 }
-YELLOW =  { r=1, g=0.8, b=0 }
-GREEN = { r=0, g=1, b=0 }
-BLUE = { r=0, g=0, b=1 }
-BLUECYAN = { r=0, g=0.7, b=1 }
-BLUEGRAY = { r=0.7, g=0.7, b=1 }
-CYAN = { r=0, g=1, b=1 }
+vscgo.RED = { r=1, g=0, b=0 }
+vscgo.YELLOW = { r=1, g=0.7, b=0 }
+vscgo.GREEN = { r=0, g=1, b=0 }
+vscgo.BLUE = { r=0, g=0, b=1 }
+vscgo.BLUECYAN = { r=0, g=0.7, b=1 }
+vscgo.BLUEGRAY = { r=0.7, g=0.7, b=1 }
+vscgo.CYAN = { r=0, g=1, b=1 }
+
+vscgo.COLOR_STOP = vscgo.COLOR_STOP or vscgo.RED
+vscgo.COLOR_RELOAD = vscgo.COLOR_RELOAD or vscgo.YELLOW
+vscgo.COLOR_TESTPKG = vscgo.COLOR_TESTPKG or vscgo.CYAN
+vscgo.COLOR_CONT = vscgo.COLOR_CONT or vscgo.GREEN
+vscgo.COLOR_STEPINTO = vscgo.COLOR_STEPINTO or vscgo.BLUECYAN
+vscgo.COLOR_STEPOVER = vscgo.COLOR_STEPOVER or vscgo.BLUE
+vscgo.COLOR_STEPOUT = vscgo.COLOR_STEPOUT or vscgo.BLUEGRAY
 
 
 -- AND NOW FOR SOMETHING DIFFERENT: THE REAL MEAT --
@@ -77,14 +85,14 @@ end
 
 vscgo.keymap = {
   name="vsc-golang-debug",
-  [vscgo.KEY_STOP] = {c=RED, press=vscgo.debug_stop},
-  [vscgo.KEY_RELOAD] = {c=YELLOW, press=vscgo.debug_restart},
-  [vscgo.KEY_TESTPKG] = {c=CYAN, press=vscgo.go_test_package},
+  [vscgo.KEY_STOP] = {c=vscgo.COLOR_STOP, press=vscgo.debug_stop},
+  [vscgo.KEY_RELOAD] = {c=vscgo.COLOR_RELOAD, press=vscgo.debug_restart},
+  [vscgo.KEY_TESTPKG] = {c=vscgo.COLOR_TESTPKG, press=vscgo.go_test_package},
 
-  [vscgo.KEY_CONT] = {c=GREEN, press=vscgo.debug_continue},
-  [vscgo.KEY_STEPINTO] = {c=BLUECYAN, press=vscgo.debug_stepinto},
-  [vscgo.KEY_STEPOVER] = {c=BLUE, press=vscgo.debug_stepover},
-  [vscgo.KEY_STEPOUT] = {c=BLUEGRAY, press=vscgo.debug_stepout},
+  [vscgo.KEY_CONT] = {c=vscgo.COLOR_CONT, press=vscgo.debug_continue},
+  [vscgo.KEY_STEPINTO] = {c=vscgo.COLOR_STEPINTO, press=vscgo.debug_stepinto},
+  [vscgo.KEY_STEPOVER] = {c=vscgo.COLOR_STEPOVER, press=vscgo.debug_stepover},
+  [vscgo.KEY_STEPOUT] = {c=vscgo.COLOR_STEPOUT, press=vscgo.debug_stepout},
 }
 
 mb.register_keymap(vscgo.keymap)

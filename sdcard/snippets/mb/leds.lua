@@ -1,4 +1,4 @@
--- Configuration for "busted" TDD tool
+-- Part of Multibow
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -22,20 +22,14 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-return {
-    default = {
-        lpath = "./sdcard/?.lua;./mock/?.lua",
-        -- Provides an "insl" convenience replacement for busted's insulate() using
-        -- a fixed descriptive text ... or rather, icon. Please not that "insl"
-        -- not only rhymes with "insulation", but even more so with the German
-        -- "insel", meaning "island". And that's exactly what it does: splendid
-        -- isolation...
-        e = "INSL = '[⛔]';"
-            .. "_BUSTED = require('busted');"
-            .. "function insl(f) _BUSTED.insulate(_INSL, f) end;"
-            .. "function inslit(d, f) _BUSTED.insulate(_INSL, function() _BUSTED.it(d, f) end) end;"
-        ,
-        verbose = true,
-        recursive = true
-    }
-}
+
+-- Default LED brightness in the [0.1..1] range.
+mb.brightness = 1
+
+-- Sets the Keybow key LEDs maximum brightness, in the range [0.1..1].
+function mb.set_brightness(brightness)
+    if brightness < 0.1 then brightness = 0.1 end
+    if brightness > 1 then brightness = 1 end
+    mb.brightness = brightness
+    mb.activate_leds()
+end

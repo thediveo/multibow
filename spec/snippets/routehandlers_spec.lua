@@ -23,7 +23,7 @@ SOFTWARE.
 require "mocked-keybow"
 local hwk = require("spec/hwkeys")
 
-describe("routehandlers", function()
+describe("multibow routehandlers", function()
 
     -- ensure to get a fresh multibow module instance each time we run
     -- an isolated test...

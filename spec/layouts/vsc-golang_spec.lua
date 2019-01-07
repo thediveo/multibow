@@ -1,5 +1,3 @@
--- Configuration for "busted" TDD tool
-
 --[[
 Copyright 2019 Harald Albrecht
 
@@ -22,20 +20,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-return {
-    default = {
-        lpath = "./sdcard/?.lua;./mock/?.lua",
-        -- Provides an "insl" convenience replacement for busted's insulate() using
-        -- a fixed descriptive text ... or rather, icon. Please not that "insl"
-        -- not only rhymes with "insulation", but even more so with the German
-        -- "insel", meaning "island". And that's exactly what it does: splendid
-        -- isolation...
-        e = "INSL = '[⛔]';"
-            .. "_BUSTED = require('busted');"
-            .. "function insl(f) _BUSTED.insulate(_INSL, f) end;"
-            .. "function inslit(d, f) _BUSTED.insulate(_INSL, function() _BUSTED.it(d, f) end) end;"
-        ,
-        verbose = true,
-        recursive = true
-    }
-}
+require "mocked-keybow"
+local hwk = require("spec/hwkeys")
+
+describe("VSC golang keymap", function()
+
+    local mb, go
+
+    it("initializes", function()
+        mb = require("snippets/multibow")
+        go = require("layouts/vsc-golang")
+        assert.is.equal(go.keymap.name, mb.current_keymap.name)
+        assert.is.equal(1, #mb.registered_keymaps())
+    end)
+
+    it("colors its keys", function()
+        for _, keymap in pairs({go.keymap}) do
+            for keyno = 0, 11 do
+                local keydef = keymap[keyno]
+                if keydef then
+                    assert.is_truthy(keydef.c)
+                end
+            end
+        end
+    end)
+
+end)

@@ -27,10 +27,13 @@ require "keybow"
 mb.path = (...):match("^(.-)[^%/]+$")
 
 require(mb.path .. "morekeys")
-require(mb.path .. "routehandlers")
+require(mb.path .. "mb/keys")
+require(mb.path .. "mb/routehandlers")
+require(mb.path .. "mb/leds")
 
 
-mb.brightness = 0.4
+-- Internal variables for housekeeping...
+
 -- The registered keymaps, indexed by their names (.name field).
 mb.keymaps = {}
 -- The ordered sequence of primary keymap, in the sequence they were
@@ -38,23 +41,9 @@ mb.keymaps = {}
 mb.primary_keymaps = {}
 -- The currently activated keymap.
 mb.current_keymap = nil
-
 -- A temporary keymap while grabbing.
 mb.grab_keymap = nil
 
-
---
-function mb.tap(keyno, key, ...)
-  for modifier_argno = 1, select('#', ...) do
-    local modifier = select(modifier_argno, ...)
-    if modifier then; keybow.set_modifier(modifier, keybow.KEY_DOWN); end
-  end
-  keybow.tap_key(key)
-  for modifier_argno = 1, select('#', ...) do
-    local modifier = select(modifier_argno, ...)
-    if modifier then; keybow.set_modifier(modifier, keybow.KEY_UP); end
-  end
-end
 
 -- Registers a keymap (by name), so it can be easily activated later by its name.
 -- Multiple keymaps can be registered. Keymaps can be either "primary" by
@@ -170,14 +159,6 @@ function mb.ungrab()
   mb.activate_leds()
 end
 
-
--- Sets the Keybow key LEDs maximum brightness, in the range [0.1..1].
-function mb.set_brightness(brightness)
-  if brightness < 0.1 then; brightness = 0.1; end
-  if brightness > 1 then; brightness = 1; end
-  mb.brightness = brightness
-  mb.activate_leds()
-end
 
 -- Sets key LED to specific color, taking brightness into consideration.
 -- The color is a triple (table) with the elements r, g, and b. Each color

@@ -106,3 +106,6 @@ keybow.MEDIA_SLEEP = 0xf8
 keybow.MEDIA_COFFEE = 0xf9
 keybow.MEDIA_REFRESH = 0xfa
 keybow.MEDIA_CALC = 0xfb
+
+
+return keybow -- module
