@@ -30,7 +30,9 @@ function mb.tap(key, ...)
     mb.tap_times(key, 1, ...)
 end
 
--- Taps the same key multiple times...
+-- Taps the same key multiple times, optionally with modifier keys; however,
+-- for optimization, these modifiers are only pressed once before the tap
+-- sequence, and only released once after all taps.
 function mb.tap_times(key, times, ...)
     for modifier_argno = 1, select("#", ...) do
         local modifier = select(modifier_argno, ...)

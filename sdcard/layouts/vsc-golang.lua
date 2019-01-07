@@ -53,31 +53,31 @@ vscgo.COLOR_STEPOUT = vscgo.COLOR_STEPOUT or vscgo.BLUEGRAY
 -- AND NOW FOR SOMETHING DIFFERENT: THE REAL MEAT --
 
 function vscgo.debug_stop(key)
-  mb.tap(key, keybow.F5, keybow.LEFT_SHIFT)
+  mb.tap(keybow.F5, keybow.LEFT_SHIFT)
 end
 
 function vscgo.debug_restart(key)
-  mb.tap(key, keybow.F5, keybow.LEFT_SHIFT, keybow.LEFT_CTRL)
+  mb.tap(keybow.F5, keybow.LEFT_SHIFT, keybow.LEFT_CTRL)
 end
 
 function vscgo.debug_continue(key)
-  mb.tap(key, keybow.F5)
+  mb.tap(keybow.F5)
 end
 
 function vscgo.debug_stepover(key)
-  mb.tap(key, keybow.F10)
+  mb.tap(keybow.F10)
 end
 
 function vscgo.debug_stepinto(key)
-  mb.tap(key, keybow.F11)
+  mb.tap(keybow.F11)
 end
 
 function vscgo.debug_stepout(key)
-  mb.tap(key, keybow.F11, keybow.LEFT_SHIFT)
+  mb.tap(keybow.F11, keybow.LEFT_SHIFT)
 end
 
 function vscgo.go_test_package(key)
-  mb.tap(key, "P", keybow.LEFT_SHIFT, keybow.LEFT_CTRL)
+  mb.tap("P", keybow.LEFT_SHIFT, keybow.LEFT_CTRL)
   keybow.sleep(250)
   keybow.text("go test package")
   keybow.tap_enter()
