@@ -29,8 +29,8 @@ vscgo.KEY_STOP = vscgo.KEY_STOP or 10
 vscgo.KEY_RELOAD = vscgo.KEY_RELOAD or 7
 vscgo.KEY_TESTPKG = vscgo.KEY_TESTPKG or 1
 vscgo.KEY_CONT = vscgo.KEY_CONT or 9
-vscgo.KEY_STEPOVER = vscgo.KEY_STEPOVER or 6
-vscgo.KEY_STEPINTO = vscgo.KEY_STEPINTO or 3
+vscgo.KEY_STEPINTO = vscgo.KEY_STEPINTO or 6
+vscgo.KEY_STEPOVER = vscgo.KEY_STEPOVER or 3
 vscgo.KEY_STEPOUT = vscgo.KEY_STEPOUT or 0
 
 RED = { r=1, g=0, b=0 }
