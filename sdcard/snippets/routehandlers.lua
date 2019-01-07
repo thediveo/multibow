@@ -20,17 +20,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]] --
 
--- This all-key, central key router forwards Keybow key events to
--- their correct handlers, depending on which keyboard layout currently
--- is active.
+-- This all-key, central key router forwards Keybow key events to their
+-- correct handlers, depending on which keyboard layout currently is active.
+--
+-- A keymap grab will always only route keys to the "grabbing" keymap, and to
+-- no other keymap. Without a keymap grab in place, permanent keymaps will be
+-- searched first for a matching key definition, with the first hit to score.
+-- The current keymap will be considered only last, after all permanent
+-- keymaps have been exhausted.
+--
+-- Additionally, "any" keyhandlers will be considered only for (1) the
+-- grabbing keymap (if a grab is active) and for (2) the current keymap.
+-- Permanent keymaps cannot have "any" key handlers (or rather, they will be
+-- ignored.)
 function mb.route(keyno, pressed)
-    local keydef, grabbed_any_keydef, anykdeydef
-    -- Checks for a keymap grab being enforced at this time...
+    local keydef, any_kdeydef
+    -- Checks for a keymap grab being enforced at this time; if the grabbing
+    -- keymap does not define the key, then it's game over. Additionally,
+    -- grabbing keymaps may define "any" handlers.
     if mb.grab_keymap then
         keydef = mb.grab_keymap[keyno]
-        grabbed_any_keydef = mb.grab_keymap[-1]
+        any_kdeydef = mb.grab_keymap[-1]
     else
-        -- Checks for key in permanent keymaps first...
+        -- No grab in place, so continue checking for a matching key in the
+        -- permanent keymaps first. Remember, there cannot be "any" handlers
+        -- with permanent keymaps.
         for name, keymap in pairs(mb.keymaps) do
             if keymap.permanent then
                 keydef = keymap[keyno]
@@ -39,17 +53,18 @@ function mb.route(keyno, pressed)
                 end
             end
         end
-        -- Checks for key in current keymap if no persistent key was found yet.
-        if not keydef then
-            if mb.current_keymap then
-                keydef = mb.current_keymap[keyno]
-                anykeydef = mb.current_keymap[-1]
-            end
+        -- If no permanent key matched then finally check for our key in the
+        -- current keymap. Additionally, the current keymap is allowed to
+        -- define an "any" handler.
+        if not keydef and mb.current_keymap then
+            keydef = mb.current_keymap[keyno]
+            any_kdeydef = mb.current_keymap[-1]
         end
     end
 
-    -- Bails out if no key definition to route to could be found.
-    if not (keydef or anykeydef or grabbed_any_keydef) then
+    -- Bails out now if either a specific nor an "any" key definition to route
+    -- to could be found.
+    if not (keydef or any_kdeydef) then
         return
     end
 
@@ -61,25 +76,13 @@ function mb.route(keyno, pressed)
                 mb.led(led, {r = 0, g = 0, b = 0})
             end
         end
-        if grabbed_any_keydef and grabbed_any_keydef.press then
-            grabbed_any_keydef.press(keyno)
-        end
-        if keydef and keydef.press then
-            keydef.press(keyno)
-        end
-        if anykeydef and anykeydef.press then
-            anykeydef.press(keyno)
-        end
+
+        if keydef and keydef.press then keydef.press(keyno) end
+        if any_kdeydef and any_kdeydef.press then any_kdeydef.press(keyno) end
     else
-        if grabbed_any_keydef and grabbed_any_keydef.release then
-            grabbed_any_keydef.release(keyno)
-        end
-        if keydef and keydef.release then
-            keydef.release(keyno)
-        end
-        if anykeydef and anykeydef.release then
-            anykeydef.release(keyno)
-        end
+        if keydef and keydef.release then keydef.release(keyno) end
+        if any_kdeydef and any_kdeydef.release then any_kdeydef.release(keyno) end
+
         mb.activate_leds()
     end
 end

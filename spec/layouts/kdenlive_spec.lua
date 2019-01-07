@@ -46,14 +46,24 @@ describe("Kdenlive keymap", function()
             _G.setup()
         end)
 
-        inslit("", function()
-            assert.is.equal(k.keymap.name, mb.current_keymap.name)
-            hwk.tap(shift.KEY_SHIFT)
-            assert.is.equal(k.keymap_shifted.name, mb.current_keymap.name)
-            hwk.tap(0) -- FIXME
-            assert.is.equal(k.keymap.name, mb.current_keymap.name)
-            hwk.tap(shift.KEY_SHIFT)
-            assert.is.equal(k.keymap_shifted.name, mb.current_keymap.name)
+        inslit("automatically un-shifts after key press", function()
+            local some_key = shift.KEY_SHIFT ~= 0 and 0 or 1
+
+            for round = 1, 2 do
+                for round = 1, 2 do
+                    assert.is.equal(k.keymap.name, mb.current_keymap.name)
+                    hwk.tap(shift.KEY_SHIFT)
+                    assert.is.equal(k.keymap_shifted.name, mb.current_keymap.name)
+                    hwk.tap(some_key)
+                    assert.is.equal(k.keymap.name, mb.current_keymap.name)
+                end
+                for round = 1, 2 do
+                    hwk.tap(shift.KEY_SHIFT)
+                    assert.is.equal(k.keymap_shifted.name, mb.current_keymap.name)
+                    hwk.tap(shift.KEY_SHIFT)
+                    assert.is.equal(k.keymap.name, mb.current_keymap.name)
+                end
+            end
         end)
 
     end)

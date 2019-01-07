@@ -30,8 +30,12 @@ local mb = require "snippets/multibow"
 
 -- Unshift to primary keymap. For simplification, use it with the "anykey"
 -- release handlers, see below.
-function k.unshift()
-    mb.activate_keymap(k.keymap.name)
+function k.unshift(keyno)
+    if keyno == 11 then 
+        print(debug.traceback())
+    else
+        mb.activate_keymap(k.keymap.name)
+    end
 end
 
 -- Key colors for unshifted and shifted keys; keep them rather muted in order
