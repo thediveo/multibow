@@ -103,6 +103,62 @@ layout by courtesy of Margaret Thatcher._)
 └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
 ```
 
+## Your Own Multikey Keyboard Layout
+
+You may want to start from our template in `layouts/keymap-template.lua`.
+
+1. copy and rename the new layout file name to something more meaningful.
+
+2. edit your new layout file and change its name which is specified in the
+   `kmt.name` element:
+
+    ```lua
+    km.keymap = {
+        -- IMPORTANT: Make sure to change the keymap name to make it unique!
+        name="my-cool-layout",
+        -- ...
+    }
+    ```
+
+3. add key definitions for colors and handlers as necessary, see next for examples.
+
+    * you can specify key handlers either "inline", as you can see from the
+      example mapping for key #0:
+
+      ```lua
+      km.keymap = {
+        -- ...
+        [0] = { c={r=1, g=1, b=1}, press=function() mb.tap("a") end},
+      }
+      ```
+
+      This sets the key #0's LED color to white, and emits an "a" press everytime
+      you tap key #0.
+
+    * for more complex handling, you may want to use a dedicated function instead:
+
+      ```lua
+      function km.mypress(keyno)
+        mb.tap("a")
+      end
+
+      km.keymap = {
+        -- ...
+        [1] = { c={r=1, g=1, b=1}, press=km.mypress}
+      }
+
+    * you can also do things on key releases:
+
+      ```lua
+      km.keymap = {
+        -- ...
+        [2] = { c={r=1, g=1, b=1}, release=function() mb.tap("x") end},
+      }
+      ```
+
+For more details and examples, please have a look at the keyboard layouts in
+`layouts/vsc-golang.lua` and `layouts/kdenlive.lua`.
+
 ## Licenses
 
 Multibow is (c) 2019 Harald Albrecht and is licensed under the MIT license, see

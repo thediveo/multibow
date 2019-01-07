@@ -95,6 +95,16 @@ describe("Kdenlive keymap", function()
             assert.spy(sm).was.called()
         end)
 
+        inslit("taps", function()
+            local s = spy.on(mb, "tap")
+
+            hwk.tap(k.KEY_PLAY_AROUND_MOUSE)
+            assert.spy(s).was.called()
+            
+            hwk.tap(shift.KEY_SHIFT)
+            hwk.tap(k.KEY_PLAY_AROUND_MOUSE)
+        end)
+
     end)
 
 end)

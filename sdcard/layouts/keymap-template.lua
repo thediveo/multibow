@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-local empty = {} -- module
+local km = {} -- module
 
 local mb = require("snippets/multibow")
 
@@ -44,7 +44,26 @@ cable going off "northwards":
 
 ]]--
 
-empty.keymap = { name="empty" }
-mb.register_keymap(empty.keymap)
+-- Some action on a certain key press...
+function km.mypress(keyno)
+end
 
-return empty -- module
+-- Some action on a certain key release...
+function km.myrelease(keyno)
+end
+
+-- The keymap layout...
+km.keymap = {
+    -- IMPORTANT: Make sure to change the keymap name to make it unique!
+    name="keymap-template",
+
+    -- The index entries below are defining keys as to their LED color and
+    -- what key taps should be send to the USB host to which your Keybow is
+    -- connected to.
+    [0] = { c={r=1, g=1, b=1}, press=function() mb.tap("a") end},
+    [1] = { c={r=1, g=1, b=1}, press=km.mypress},
+    [2] = { c={r=1, g=1, b=1}, release=km.myrelease},
+}
+mb.register_keymap(km.keymap)
+
+return km -- module

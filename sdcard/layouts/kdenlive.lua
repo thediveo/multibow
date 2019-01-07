@@ -29,16 +29,50 @@ require("keybow")
 local mk = require("snippets/morekeys")
 local mb = require("snippets/multibow")
 
+--[[
+The Keybow layout is as follows when in landscape orientation, with the USB
+cable going off "northwards":
 
-k.KEY_CLIP_BEGIN = k.KEY_CLIP_BEGIN or 9
-k.KEY_PROJECT_BEGIN = k.KEY_PROJECT_BEGIN or 9
+              ┋┋
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊ 11 ┊  ┊  8 ┊  ┊  5 ┊  ┊  2 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
 
-k.KEY_CLIP_END = k.KEY_CLIP_END or 0
-k.KEY_PROJECT_END = k.KEY_PROJECT_END or 0
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊ 10 ┊  ┊  7 ┊  ┊  4 ┊  ┊  1 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊  9 ┊  ┊  6 ┊  ┊  3 ┊  ┊  0 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+          ⍇       ⍈     
+        (⯬)     (⯮)
+
+]]--
+
+k.KEY_PLAY_AROUND_MOUSE = k.KEY_PLAY_AROUND_MOUSE or 10
+
+k.KEY_ZONE_BEGIN = k.KEY_ZONE_BEGIN or 7
+k.KEY_ZONE_END = k.KEY_ZONE_END or 4
+
+k.KEY_CLIP_BEGIN = k.KEY_CLIP_BEGIN or 6
+k.KEY_CLIP_END = k.KEY_CLIP_END or 3
+k.KEY_PROJECT_BEGIN = k.KEY_PROJECT_BEGIN or 6
+k.KEY_PROJECT_END = k.KEY_PROJECT_END or 3
 
 -- (Default) key colors for unshifted and shifted keys.
 k.COLOR_UNSHIFTED = k.COLOR_UNSHIFTED or {r=0, g=1, b=0}
 k.COLOR_SHIFTED = k.COLOR_SHIFTED or {r=1, g=0, b=0}
+
+
+function k.play_around_mouse(...)
+    mb.tap("p")
+    mb.tap_times(keybow.LEFT_ARROW, 3, keybow.LEFT_SHIFT)
+    mb.tap("i")
+    mb.tap_times(keybow.RIGHT_ARROW, 3, keybow.LEFT_SHIFT)
+    mb.tap("o")
+    mb.tap(...)
+end
 
 
 -- Unshift to primary keymap. For simplification, use it with the "anykey"
@@ -47,18 +81,34 @@ function k.unshift(keyno)
     mb.activate_keymap(k.keymap.name)
 end
 
-k.keymap = {
+-- Helps avoiding individual color setting...
+function k.init_color(keymap, color)
+    for keyno, keydef in pairs(keymap) do
+        if type(keyno) == "number" and keyno >= 0 then
+            if not keydef.c then
+                keydef.c = color
+            end
+        end
+    end
+    return keymap
+end
+
+k.keymap = k.init_color({
     name="kdenlive",
-    [k.KEY_CLIP_BEGIN] = {c=k.COLOR_UNSHIFTED, press=function() mb.tap(mk.HOME) end},
-    [k.KEY_CLIP_END] = {c=k.COLOR_UNSHIFTED, press=function() mb.tap(mk.END) end},
-}
-k.keymap_shifted = {
+    [k.KEY_ZONE_BEGIN] = {press=function() mb.tap("I") end},
+    [k.KEY_ZONE_END] = {press=function() mb.tap("O") end},
+    [k.KEY_CLIP_BEGIN] = {press=function() mb.tap(mk.HOME) end},
+    [k.KEY_CLIP_END] = {press=function() mb.tap(mk.END) end},
+    [k.KEY_PLAY_AROUND_MOUSE] = {press=function() k.play_around_mouse(keybow.SPACE, keybow.LEFT_CTRL) end},
+}, k.COLOR_UNSHIFTED)
+k.keymap_shifted = k.init_color({
     name="kdenlive-shifted",
     secondary=true,
-    [k.KEY_PROJECT_BEGIN] = {c=k.COLOR_SHIFTED, press=function() mb.tap(mk.HOME, keybow.LEFT_CTRL) end},
-    [k.KEY_PROJECT_END] = {c=k.COLOR_SHIFTED, press=function() mb.tap(mk.END, keybow.LEFT_CTRL) end},
+    [k.KEY_PROJECT_BEGIN] = {press=function() mb.tap(mk.HOME, keybow.LEFT_CTRL) end},
+    [k.KEY_PROJECT_END] = {press=function() mb.tap(mk.END, keybow.LEFT_CTRL) end},
+    [k.KEY_PLAY_AROUND_MOUSE] = {press=function() k.play_around_mouse(keybow.SPACE, keybow.LEFT_ALT) end},
     [-1] = {release=k.unshift},
-}
+}, k.COLOR_SHIFTED)
 k.keymap.shift_to = k.keymap_shifted
 k.keymap_shifted.shift_to = k.keymap
 
