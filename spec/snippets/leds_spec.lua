@@ -29,11 +29,42 @@ describe("multibow LEDs", function()
         mb.set_brightness(0.5)
         assert.equals(0.5, mb.brightness)
 
-        mb.set_brightness(1.1)
+        mb.set_brightness(1.0)
         assert.equals(1.0, mb.brightness)
 
         mb.set_brightness(0)
-        assert.equals(0.1, mb.brightness)
+        assert.equals(mb.MIN_BRIGHTNESS, mb.brightness)
+
+        mb.set_brightness(20)
+        assert.equals(0.2, mb.brightness)
+    end)
+
+    it("cycles brightness", function()
+        function f(b, scale)
+            local copy = table.pack(table.unpack(b))
+            local len = #b
+            for i = 1, len do
+                mb.cycle_brightness(copy)
+                assert.equals(b[i], mb.brightness * scale)
+            end
+        end
+
+        f({ 0.7, 1.0, 0.4 }, 1)
+        f({ 70, 100, 40 }, 100)
+    end)
+
+    inslit("accepts LED color functions in keymaps", function()
+        local s = spy.on(mb, "led")
+        local km = {
+            name="test",
+            [0]={c={r=0, g=1, b=0}},
+            [1]={c=function() return {r=1, g=1, b=1} end}
+        }
+
+        mb.activate_keymap_leds(km)
+        assert.spy(s).was.called(2)
+        assert.spy(s).was.called_with(0, {r=0, g=1, b=0})
+        assert.spy(s).was.called_with(1, {r=1, g=1, b=1})
     end)
 
 end)

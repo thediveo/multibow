@@ -46,7 +46,7 @@ describe("Kdenlive keymap", function()
             _G.setup()
         end)
 
-        it("colors its keys", function()
+        inslit("colors its keys", function()
             for _, keymap in pairs(mb.registered_keymaps()) do
                 if string.sub(keymap.name, 1, #"kdenlive") == "kdenlive" then
                     for keyno = 0, 11 do

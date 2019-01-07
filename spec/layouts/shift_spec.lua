@@ -179,6 +179,25 @@ describe("SHIFT multibow keymap", function()
             end)
         end)
 
+        inslit("cycles brightness", function()
+            local s = spy.on(mb, "led")
+
+            local len = #shift.BRIGHTNESS_LEVELS
+            for i = 1, len do
+                assert.equals(mb.brightness * 100, shift.BRIGHTNESS_LEVELS[i])
+                -- enters SHIFT and check the brightness of brightness key...
+                s:clear()
+                hwk.press(shift.KEY_SHIFT)
+                assert.spy(s).was.called_with(
+                    shift.KEY_BRIGHTNESS, 
+                    shift.next_brightness_color())
+                -- cycles to next brightness
+                hwk.tap(shift.KEY_BRIGHTNESS)
+                hwk.release(shift.KEY_SHIFT)
+            end
+            assert.equals(mb.brightness * 100, shift.BRIGHTNESS_LEVELS[1])
+        end)
+
     end)
 
 end)
