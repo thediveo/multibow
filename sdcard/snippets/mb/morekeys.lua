@@ -1,9 +1,9 @@
+-- Multibow module providing additional USB HID keycode definitions to augment
+-- the existing keybow definitions. For more information about USB HID
+-- keyboard scan codes, for instance, see:
+-- https://gist.github.com/MightyPork/6da26e382a7ad91b5496ee55fdc73db2
+
 --[[
-Provide additional keybow USB HID key definitions.
-
-For more information about USB HID keyboard scan codes, for instance,
-see: https://gist.github.com/MightyPork/6da26e382a7ad91b5496ee55fdc73db2
-
 Copyright 2019 Harald Albrecht
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
@@ -26,6 +26,11 @@ SOFTWARE.
 ]]--
 
 require("keybow")
+
+-- Tell luacheck that it is okay in this specific case to change the keybow
+-- global.
+
+-- luacheck: globals keybow
 
 keybow.SYSRQ = 0x46
 keybow.SCROLLLOCK = 0x47

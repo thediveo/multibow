@@ -20,6 +20,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
+-- luacheck: globals handle_key_00 handle_key_01
+
 local hwk = require("spec/hwkeys")
 
 describe("Keybow hardware key handler module", function()
@@ -61,7 +63,7 @@ describe("Keybow hardware key handler module", function()
             assert.equals(2, #seq)
             assert.same({true, false}, seq)
         end)
-    
+
     end)
 
 end)

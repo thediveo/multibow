@@ -44,7 +44,7 @@ describe("multibow keys", function()
         mb.tap("x", keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
         assert.spy(tap).was.called(1)
         assert.spy(mod).was.called(4)
-        for _, ud in pairs({keybow.KEY_DOWN, keybow.KEY_UP}) do 
+        for _, ud in pairs({keybow.KEY_DOWN, keybow.KEY_UP}) do
             assert.spy(mod).was.called_with(keybow.LEFT_CTRL, ud)
             assert.spy(mod).was.called_with(keybow.LEFT_SHIFT, ud)
         end
@@ -61,7 +61,7 @@ describe("multibow keys", function()
         assert.spy(tap).was.called(3)
         assert.spy(tap).was.called_with("x")
         assert.spy(mod).was.called(2)
-        for _, ud in pairs({keybow.KEY_DOWN, keybow.KEY_UP}) do 
+        for _, ud in pairs({keybow.KEY_DOWN, keybow.KEY_UP}) do
             assert.spy(mod).was.called_with(keybow.LEFT_CTRL, ud)
         end
     end)

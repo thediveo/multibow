@@ -1,4 +1,4 @@
--- Configuration for "busted" TDD tool
+-- Configuration for "busted" TDD tool to unit test Multibow
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -24,7 +24,7 @@ SOFTWARE.
 
 return {
     default = {
-        lpath = "./sdcard/?.lua;./mock/?.lua",
+        lpath = "./sdcard/?.lua;./spec/mock/?.lua",
         -- Provides an "insl" convenience replacement for busted's insulate() using
         -- a fixed descriptive text ... or rather, icon. Please not that "insl"
         -- not only rhymes with "insulation", but even more so with the German

@@ -1,3 +1,6 @@
+-- A Multibow keyboard layout for the Kdenlive (https://kdenlive.org/) open
+-- source non-linear video editor.
+
 --[[
 Copyright 2019 Harald Albrecht
 
@@ -20,15 +23,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
+
 -- allow users to set their own configuration before req'ing this
 -- module, in order to control the key layout. For defaults, please see
 -- below.
 local k = _G.kdenlive or {} -- module
 
-require("keybow")
-local mk = require("snippets/morekeys")
 local mb = require("snippets/multibow")
 
+-- luacheck: ignore 614
 --[[
 The Keybow layout is as follows when in landscape orientation, with the USB
 cable going off "northwards":
@@ -77,7 +80,7 @@ end
 
 -- Unshift to primary keymap. For simplification, use it with the "anykey"
 -- release handlers, see below.
-function k.unshift(keyno)
+function k.unshift(_)
     mb.activate_keymap(k.keymap.name)
 end
 
@@ -97,15 +100,15 @@ k.keymap = k.init_color({
     name="kdenlive",
     [k.KEY_ZONE_BEGIN] = {press=function() mb.tap("I") end},
     [k.KEY_ZONE_END] = {press=function() mb.tap("O") end},
-    [k.KEY_CLIP_BEGIN] = {press=function() mb.tap(mk.HOME) end},
-    [k.KEY_CLIP_END] = {press=function() mb.tap(mk.END) end},
+    [k.KEY_CLIP_BEGIN] = {press=function() mb.tap(keybow.HOME) end},
+    [k.KEY_CLIP_END] = {press=function() mb.tap(keybow.END) end},
     [k.KEY_PLAY_AROUND_MOUSE] = {press=function() k.play_around_mouse(keybow.SPACE, keybow.LEFT_CTRL) end},
 }, k.COLOR_UNSHIFTED)
 k.keymap_shifted = k.init_color({
     name="kdenlive-shifted",
     secondary=true,
-    [k.KEY_PROJECT_BEGIN] = {press=function() mb.tap(mk.HOME, keybow.LEFT_CTRL) end},
-    [k.KEY_PROJECT_END] = {press=function() mb.tap(mk.END, keybow.LEFT_CTRL) end},
+    [k.KEY_PROJECT_BEGIN] = {press=function() mb.tap(keybow.HOME, keybow.LEFT_CTRL) end},
+    [k.KEY_PROJECT_END] = {press=function() mb.tap(keybow.END, keybow.LEFT_CTRL) end},
     [k.KEY_PLAY_AROUND_MOUSE] = {press=function() k.play_around_mouse(keybow.SPACE, keybow.LEFT_ALT) end},
     [-1] = {release=k.unshift},
 }, k.COLOR_SHIFTED)

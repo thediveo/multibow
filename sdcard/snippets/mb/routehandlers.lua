@@ -1,4 +1,6 @@
--- Part of Multibow
+-- Multibow internal "module" implementing routing Keybow hardware key presses
+-- and releases from the Keybow Lua firmware to our keymaps with their own key
+-- handlers.
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -21,6 +23,9 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]] --
+
+
+-- luacheck: globals mb
 
 -- This all-key, central key router forwards Keybow key events to their
 -- correct handlers, depending on which keyboard layout currently is active.
@@ -47,7 +52,7 @@ function mb.route(keyno, pressed)
         -- No grab in place, so continue checking for a matching key in the
         -- permanent keymaps first. Remember, there cannot be "any" handlers
         -- with permanent keymaps.
-        for name, keymap in pairs(mb.keymaps) do
+        for _, keymap in pairs(mb.keymaps) do
             if keymap.permanent then
                 keydef = keymap[keyno]
                 if keydef then

@@ -21,7 +21,7 @@ SOFTWARE.
 ]]--
 
 require "mocked-keybow"
-local hwk = require("spec/hwkeys")
+require("spec/hwkeys")
 
 describe("VSC golang keymap", function()
 

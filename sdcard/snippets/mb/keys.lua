@@ -1,4 +1,5 @@
--- Part of Multibow
+-- Multibow internal "module" implementing convenience functions for sending
+-- key presses to the USB host to which the Keybow device is connected to.
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -22,6 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
+-- luacheck: globals mb
+
+-- Default delay between rapidly (repeated) key presses, can be overridden.
+mb.KEY_DELAY_MS = mb.KEY_DELAY_MS or 100
+
+-- Delay between key presses
+function mb.delay()
+    keybow.sleep(mb.KEY_DELAY_MS)
+end
+
 -- Sends a single key tap to the USB host, optionally with modifier keys, such
 -- as SHIFT (keybow.LEFT_SHIFT), CTRL (keybow.LEFT_CTRL), et cetera. The "key"
 -- parameter can be a string or a Keybow key code, such as keybow.HOME, et
@@ -36,15 +47,14 @@ end
 function mb.tap_times(key, times, ...)
     for modifier_argno = 1, select("#", ...) do
         local modifier = select(modifier_argno, ...)
-        if modifier then; keybow.set_modifier(modifier, keybow.KEY_DOWN); end
+        if modifier then keybow.set_modifier(modifier, keybow.KEY_DOWN) end
       end
-      for tap = 1, times do
+      for _ = 1, times do
         keybow.tap_key(key)
-        keybow.sleep(100)
+        mb.delay()
     end
     for modifier_argno = 1, select("#", ...) do
         local modifier = select(modifier_argno, ...)
-        if modifier then; keybow.set_modifier(modifier, keybow.KEY_UP); end
+        if modifier then keybow.set_modifier(modifier, keybow.KEY_UP) end
       end
   end
-  

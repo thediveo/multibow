@@ -18,6 +18,34 @@ And yes, this is probably a New Year's project slightly gone overboard ...
 what sane reason is there to end up with a Lua-scripted multi-layout keyboard
 "operating" system and a bunch of automated unit test cases?
 
+## Installation
+
+1. Download the [Pibow
+   firmware](https://github.com/pimoroni/keybow-firmware/releases) and copy
+   all files inside its `sdcard/` subdirectory onto an empty, FAT32 formatted
+   microSD card. Copy only the files **inside** `sdcard/`, but do **not**
+   place them into a ~~`sdcard`~~ directory on your microSD card.
+
+2. Download all files from the `sdcard/` subdirectory of this repository and
+   then copy them onto the microSD card. This will overwrite but one file
+   `key.lua`, all other files are new.
+
+## Multiple Keyboard Layouts
+
+To enable one or more multibow keyboard layouts, edit `sdcard/keys.lua`
+accordingly in order to "`require`" them. The default configuration looks as
+follows:
+
+```lua
+require "layouts/shift" -- for cycling between layouts.
+require "layouts/vsc-golang" -- debugging Go programs in VisualStudio Code.
+require "layouts/kdenlive" -- editing video using Kdenlive.
+require "layouts/empty" -- empty, do-nothing layout.
+```
+
+> You can disable a specific keyboard layout by simply putting two dashes `--`
+> in front of the `require "..."`, making it look like `--require "..."`.
+
 ## Layouts
 
 The default setup activates the following macro keyboard layouts shown below.
@@ -56,13 +84,19 @@ Debug Go programs and packages in VisualStudio Code with its Go extension.
 
 _coming soon..._
 
-### SHIFT
+### SHIFT Overlay
 
-A SHIFT key, with Keybow LED brightness and keyboard layout cycle control.
+This layout provides a SHIFT key. Only when pressed and held, two additional
+keys become active for controlling the brightness of the Keybow LEDs and for
+switching between multiple keyboard layouts.
+
+Simply pressing and then immediately releasing the SHIFT key without pressing
+any of the other keys activates the SHIFT layer in other Multibow keyboard
+layouts that are SHIFT-aware.
 
 > **NOTE:** press and hold SHIFT, then use →LAYOUT and 🔆BRIGHT. The SHIFT key
-> is always active, regardless of keyboard layout. The other keys in this layout
-> only become active _while_ holding SHIFT.
+> is always active, regardless of keyboard layout. The other keys in this
+> layout become only active _while_ holding SHIFT.
 
 ```text
 ╔════╗  ╔╌╌╌╌╗  ╔╌╌╌╌╗  ┌╌╌╌╌┐
@@ -168,30 +202,6 @@ The file `keybow.lua` included from
 [pimoroni/keybow-firmware](https://github.com/pimoroni/keybow-firmware) for
 testing purposes is licensed under the MIT license, as declared by Pimoroni's
 keybow-firmware GitHub repository.
-
-## Installation
-
-1. Download the [Pibow
-   firmware](https://github.com/pimoroni/keybow-firmware/releases) and copy
-   all files inside its `sdcard/` subdirectory onto an empty, FAT32 formatted
-   microSD card. Copy only the files **inside** `sdcard/`, but do **not**
-   place them into a ~~`sdcard`~~ directory on your microSD card.
-
-2. Download all files from the `sdcard/` subdirectory of this repository and
-   then copy them onto the microSD card. This will overwrite but one file
-   `key.lua`, all other files are new.
-
-## Multiple Keyboard Layouts
-
-To enable one or more multibow keyboard layouts, edit `sdcard/keys.lua`
-accordingly to require them. The default configuration is as follows:
-
-```lua
-require "layouts/shift" -- for cycling between layouts.
-require "layouts/vsc-golang" -- debugging Go programs in VisualStudio Code.
-require "layouts/kdenlive" -- editing video using Kdenlive.
-require "layouts/empty" -- empty, do-nothing layout.
-```
 
 ## Developing
 

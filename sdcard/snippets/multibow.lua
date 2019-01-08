@@ -1,3 +1,6 @@
+-- "Multibow" is a Lua module for Pimoroni's Keybow firmware that offers and
+-- manages multiple keyboard layouts.
+
 --[[
 Copyright 2019 Harald Albrecht
 
@@ -20,149 +23,25 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-mb = {} -- module
+-- luacheck: globals mb
+mb = mb or {} -- module
 
 require "keybow"
 
+-- Pulls in the individual modules that make up Multibow.
 mb.path = (...):match("^(.-)[^%/]+$")
 
-require(mb.path .. "morekeys")
+require(mb.path .. "mb/morekeys")
+require(mb.path .. "mb/keymaps")
 require(mb.path .. "mb/keys")
 require(mb.path .. "mb/routehandlers")
 require(mb.path .. "mb/leds")
 
 
--- Internal variables for housekeeping...
-
--- The registered keymaps, indexed by their names (.name field).
-mb.keymaps = {}
--- The ordered sequence of primary keymap, in the sequence they were
--- registered.
-mb.primary_keymaps = {}
--- The currently activated keymap.
-mb.current_keymap = nil
--- A temporary keymap while grabbing.
-mb.grab_keymap = nil
-
-
--- Registers a keymap (by name), so it can be easily activated later by its name.
--- Multiple keymaps can be registered. Keymaps can be either "primary" by
--- default, or permanent or secondary keymaps.
---
--- A primary keymap is any keymap without either a "permanent" or "secondary"
--- table element. Users can cycle through primary keymaps using the "shift"
--- permanent keyboard layout.
---
--- permanent keymaps (marked by table element "permanent=true") are always
--- active, thus they don't need to be activated.
---
--- Secondary keymaps (marked by table element "secondary=true") are intended
--- as SHIFT/modifier layers. As such the get ignored by cycling, but instead
--- need to be activated explicitly. The "shift" permanent keyboard layout
--- automates this.
---
--- If this is the first keymap getting registered, then it will also made
--- activated.
-function mb.register_keymap(keymap)
-  local name = keymap.name
-  -- register
-  mb.keymaps[name] = keymap
-  -- ensure that first registered keymap also automatically gets activated
-  -- (albeit the LEDs will only update later). Also maintain the (ordered)
-  -- sequence of registered primary keymaps.
-  if not (keymap.permanent or keymap.secondary) then
-    mb.current_keymap = mb.current_keymap or keymap
-    table.insert(mb.primary_keymaps, keymap)
-  end
-end
-
--- Returns the list of currently registered keymaps; this list is a table,
--- with its registered keymaps at indices 1, 2, ...
-function mb.registered_keymaps()
-  local keymaps = {}
-  for name, keymap in pairs(mb.keymaps) do
-    table.insert(keymaps, keymap)
-  end
-  return keymaps
-end
-
--- Returns the list of currently registered primary keymaps, in the same order
--- as they were registered. First primary is at index 1, second at 2, ...
-function mb.registered_primary_keymaps()
-  return mb.primary_keymaps
-end
-
--- Cycles through the available (primary) keymaps, ignoring secondary and
--- permanent keymaps. This is convenient for assigning primary keymap switching
--- using a key on the Keybow device itself.
-function mb.cycle_primary_keymaps()
-  local km = mb.current_keymap
-  if km == nil then return end
-  -- If this is a secondary keymap, locate its corresponding primary keymap.
-  if km.secondary then
-    if not km.shift_to then
-      -- No SHIFT's shift_to cyclic chain available, so rely on the naming
-      -- schema instead and try to locate the primary keymap with the first
-      -- match instead. This assumes that the name of the secondary keymaps
-      -- have some suffix and thus are longer than the name of their
-      -- corresponding primary keymap.
-      for idx, pkm in ipairs(mb.primary_keymaps) do
-        if string.sub(km.name, 1, #pkm.name) == pkm.name then
-          km = pkm
-          break
-        end
-      end
-      -- Checks if locating the primary keymap failed and then bails out
-      -- immediately.
-      if km.secondary then return end
-    else
-      -- Follows the cyclic chain of SHIFT's shift_to keymaps, until we get
-      -- to the primary keymap in the cycle, or until we have completed one
-      -- cycle.
-      repeat
-        km = km.shift_to
-        if not km or km == mb.current_keymap then
-          return
-        end
-      until not(km.secondary)
-    end
-  end
-  -- Move on to the next primary keymap, rolling over at the end of our list.
-  for idx, pkm in ipairs(mb.primary_keymaps) do
-    if pkm == km then
-      idx = idx + 1
-      if idx > #mb.primary_keymaps then idx = 1 end
-      mb.activate_keymap(mb.primary_keymaps[idx].name)
-    end
-  end
-end
-
--- Activates a specific keymap by name. Please note that it isn't necessary
--- to "activate" permanent keymaps at all (and thus this deed cannot be done).
-function mb.activate_keymap(name)
-  local keymap = mb.keymaps[name]
-  if keymap and not keymap.permanent then
-    mb.current_keymap = keymap
-    mb.activate_leds()
-  end
-end
-
-
---
-function mb.grab(name)
-  mb.grab_keymap = mb.keymaps[name]
-  mb.activate_leds()
-end
-
-function mb.ungrab()
-  mb.grab_keymap = nil
-  mb.activate_leds()
-end
-
-
 -- Disables the automatic Keybow lightshow and sets the key LED colors. This
 -- is a well-known (hook) function that gets called by the Keybow firmware
 -- after initialization immediately before waiting for key events.
+-- luacheck: globals setup
 function setup()
   -- Disables the automatic keybow lightshow and switches all key LEDs off
   -- because the LEDs might be in a random state after power on.

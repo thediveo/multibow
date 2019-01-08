@@ -1,4 +1,6 @@
--- A permanent "SHIFT" keymap for cycling keymaps and LED brightness control.
+-- A permanent "SHIFT" Multibow keymap layout for cycling keymaps, LED
+-- brightness control, and adding SHIFT layers to other Multibow keyboard
+-- (multi) layouts.
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -29,6 +31,7 @@ local shift = _G.shift or {} -- module
 
 local mb = require "snippets/multibow"
 
+-- luacheck: ignore 614
 --[[
 The Keybow layout is as follows when in landscape orientation, with the USB
 cable going off "northwards":
@@ -55,7 +58,7 @@ shift.KEY_SHIFT = shift.KEY_SHIFT or 11
 shift.KEY_LAYOUT = shift.KEY_LAYOUT or 8
 shift.KEY_BRIGHTNESS = shift.KEY_BRIGHTNESS or 5
 
-shift.BRIGHTNESS_LEVELS = shift.BRIGHTNESS_LEVELS or { 70, 100, 40 } 
+shift.BRIGHTNESS_LEVELS = shift.BRIGHTNESS_LEVELS or { 70, 100, 40 }
 
 
 -- Internal flag for detecting SHIFT press-release sequences without any SHIFTed
@@ -79,12 +82,12 @@ end
 
 -- Remember how many grabbed keys are pressed, so we won't ungrab later until
 -- all keys have been released.
-function shift.any_press(keyno)
+function shift.any_press(_)
     grabbed_key_count = grabbed_key_count + 1
 end
 
 -- Only ungrab after last key has been released
-function shift.any_release(keyno)
+function shift.any_release(_)
     if grabbed_key_count > 0 then
         grabbed_key_count = grabbed_key_count - 1
         if grabbed_key_count == 0 then
@@ -101,16 +104,13 @@ end
 -- SHIFT press: switches into grabbed SHIFT mode, activating the in-SHIFT keys
 -- for brightness change, keymap cycling, et cetera.
 function shift.shift(key)
-    grabbed_keys = 1 -- includes myself; this is necessary as the grab "any"
-                     -- handler will not register the SHIFT press, because it
-                     -- wasn't grabbed yet.
     shift_only = true
     shift.any_press(key)
     mb.grab(shift.keymap_shifted.name)
 end
 
 -- Cycles to the next primary keyboard layout (keymap)
-function shift.cycle(key)
+function shift.cycle(_)
     shift_only = false
     mb.cycle_primary_keymaps()
 end

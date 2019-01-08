@@ -30,11 +30,11 @@ describe("empty multibow keymap", function()
         it("installs a single empty primary keymap", function()
             -- Sanity check that there are no registered keymaps yet.
             assert.is.equal(#mb.registered_keymaps(), 0)
-            
+
             local empty = require("layouts/empty")
             assert.is_not_nil(empty) -- we're going over the top here...
             assert.is_not_nil(empty.keymap) -- ...even more so.
-            
+
             -- empty must register exactly one keymap, and it must be
             -- a primary keymap, not permanent or secondary.
             local kms = mb.registered_keymaps()

@@ -30,7 +30,7 @@ describe("Kdenlive keymap", function()
         local mb = require("snippets/multibow")
         local k = require("layouts/kdenlive")
         assert.is.equal(k.keymap.name, mb.current_keymap.name)
- 
+
         local kms = mb.registered_keymaps()
         assert.is.equal(2, #kms)
     end)
@@ -58,19 +58,19 @@ describe("Kdenlive keymap", function()
                 end
             end
         end)
-    
+
         inslit("automatically un-shifts after key press", function()
             local some_key = shift.KEY_SHIFT ~= 0 and 0 or 1
 
-            for round = 1, 2 do
-                for round = 1, 2 do
+            for round = 1, 2 do -- luacheck: ignore 213
+                for round = 1, 2 do -- luacheck: ignore 213 423
                     assert.equals(k.keymap.name, mb.current_keymap.name)
                     hwk.tap(shift.KEY_SHIFT)
                     assert.equals(k.keymap_shifted.name, mb.current_keymap.name)
                     hwk.tap(some_key)
                     assert.equals(k.keymap.name, mb.current_keymap.name)
                 end
-                for round = 1, 2 do
+                for round = 1, 2 do -- luacheck: ignore 213 423
                     hwk.tap(shift.KEY_SHIFT)
                     assert.equals(k.keymap_shifted.name, mb.current_keymap.name)
                     hwk.tap(shift.KEY_SHIFT)
@@ -100,7 +100,7 @@ describe("Kdenlive keymap", function()
 
             hwk.tap(k.KEY_PLAY_AROUND_MOUSE)
             assert.spy(s).was.called()
-            
+
             hwk.tap(shift.KEY_SHIFT)
             hwk.tap(k.KEY_PLAY_AROUND_MOUSE)
         end)

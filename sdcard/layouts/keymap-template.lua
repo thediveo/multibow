@@ -1,5 +1,4 @@
--- An empty Multibow Keybow layout. Useful for "switching off" any active
--- keymaps, with only the permanent keymaps (SHIFT, etc) being still in place.
+-- A Multibow template layout, useful for starting your own keymap layouts.
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -45,11 +44,11 @@ cable going off "northwards":
 ]]--
 
 -- Some action on a certain key press...
-function km.mypress(keyno)
+function km.mypress(keyno) -- luacheck: ignore 212
 end
 
 -- Some action on a certain key release...
-function km.myrelease(keyno)
+function km.myrelease(keyno) -- luacheck: ignore 212
 end
 
 -- The keymap layout...

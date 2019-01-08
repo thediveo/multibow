@@ -1,3 +1,7 @@
+-- Mocks some parts of the Keybow Lua module during unit tests, so we can run
+-- the tests outside the Keybow firmware on a standard (full-blown) Lua host
+-- system.
+
 --[[
 Copyright 2019 Harald Albrecht
 
@@ -20,36 +24,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-require "mocked-keybow"
+local busted=require("busted")
+local sock=require("socket")
 
-describe("template multibow keymap", function()
+require "keybow"
+-- luacheck: globals keybow.no_delay
+keybow.no_delay = keybow.no_delay or true
 
-    local mb = require("snippets/multibow")
-    local hwk = require("spec/hwkeys")
-    local kmt = require("layouts/keymap-template")
+busted.stub(keybow, "auto_lights")
+busted.stub(keybow, "clear_lights")
+busted.stub(keybow, "load_pattern")
+busted.stub(keybow, "set_pixel")
+busted.stub(keybow, "set_key")
+busted.stub(keybow, "set_modifier")
+busted.stub(keybow, "tap_key")
 
-    inslit("installs a single primary keymap", function()
-        assert.is_not_nil(kmt) -- we're going over the top here...
-        assert.is_not_nil(kmt.keymap) -- ...even more so.
+-- luacheck: globals keybow.sleep
+function keybow.sleep(ms)
+    if not keybow.no_delay then
+        sock.sleep(ms / 1000)
+    end
+end
 
-        -- empty must register exactly one keymap, and it must be
-        -- a primary keymap, not permanent or secondary.
-        local kms = mb.registered_keymaps()
-        assert.is.equal(1, #kms)
-        local keymap = kms[1]
-        assert.is_falsy(keymap.permanent)
-        assert.is_falsy(keymap.secondary)
-    end)
+-- luacheck: globals keybow.usleep
+function keybow.usleep(us)
+    keybow.sleep(us / 1000)
+end
 
-
-    inslit("calls press and release handlers", function()
-        local mp = spy.on(kmt.keymap[1], "press")
-        local mr = spy.on(kmt.keymap[2], "release")
-
-        hwk.tap(1)
-        assert.spy(mp).was.called(1)
-        hwk.tap(2)
-        assert.spy(mr).was.called(1)
-    end)
-
-end)
+return keybow -- adhere to Lua's (new) module rules

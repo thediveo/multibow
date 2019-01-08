@@ -40,7 +40,7 @@ describe("multibow LEDs", function()
     end)
 
     it("cycles brightness", function()
-        function f(b, scale)
+        local f = function(b, scale)
             local copy = table.pack(table.unpack(b))
             local len = #b
             for i = 1, len do

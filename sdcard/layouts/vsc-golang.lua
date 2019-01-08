@@ -1,4 +1,27 @@
--- VSC Go extension debug Keybow layout
+-- A Multibow keyboard layout for the VisualStudio Go extension
+-- (https://github.com/Microsoft/vscode-go).
+
+--[[
+Copyright 2019 Harald Albrecht
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+]]--
 
 local vscgo = _G.vscgo or {} -- module
 
@@ -52,31 +75,31 @@ vscgo.COLOR_STEPOUT = vscgo.COLOR_STEPOUT or vscgo.BLUEGRAY
 
 -- AND NOW FOR SOMETHING DIFFERENT: THE REAL MEAT --
 
-function vscgo.debug_stop(key)
+function vscgo.debug_stop(_)
   mb.tap(keybow.F5, keybow.LEFT_SHIFT)
 end
 
-function vscgo.debug_restart(key)
+function vscgo.debug_restart(_)
   mb.tap(keybow.F5, keybow.LEFT_SHIFT, keybow.LEFT_CTRL)
 end
 
-function vscgo.debug_continue(key)
+function vscgo.debug_continue(_)
   mb.tap(keybow.F5)
 end
 
-function vscgo.debug_stepover(key)
+function vscgo.debug_stepover(_)
   mb.tap(keybow.F10)
 end
 
-function vscgo.debug_stepinto(key)
+function vscgo.debug_stepinto(_)
   mb.tap(keybow.F11)
 end
 
-function vscgo.debug_stepout(key)
+function vscgo.debug_stepout(_)
   mb.tap(keybow.F11, keybow.LEFT_SHIFT)
 end
 
-function vscgo.go_test_package(key)
+function vscgo.go_test_package(_)
   mb.tap("P", keybow.LEFT_SHIFT, keybow.LEFT_CTRL)
   keybow.sleep(250)
   keybow.text("go test package")

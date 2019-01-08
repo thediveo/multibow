@@ -109,8 +109,8 @@ describe("multibow", function()
         -- on purpose, the names of the primary keymaps are in reverse lexical order,
         -- to make sure that cycling follows the registration order, but not the
         -- name order.
-        local prim1km = { name= "last" }
-        local sec1km = { name="last-shift", secondary=true, shift_to }
+        local prim1km = { name= "last", shift_to=nil }
+        local sec1km = { name="last-shift", secondary=true, shift_to=nil }
         prim1km.shift_to = sec1km
         local prim2km = { name= "first" }
         mb.register_keymap(prim1km)
@@ -130,7 +130,7 @@ describe("multibow", function()
     inslit("sets up multibow, activates lights", function()
         local s = spy.on(_G, "setup")
         local al = spy.on(mb, "activate_leds")
-        
+
         _G.setup()
         assert.spy(s).was.called(1)
         assert.spy(al).was.called(1)

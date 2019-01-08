@@ -20,36 +20,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-require "mocked-keybow"
+-- luacheck: globals keybow.no_delay
+require("mocked-keybow")
 
-describe("template multibow keymap", function()
+describe("Mocked Keybow API", function()
 
-    local mb = require("snippets/multibow")
-    local hwk = require("spec/hwkeys")
-    local kmt = require("layouts/keymap-template")
+    local sock=require("socket")
 
-    inslit("installs a single primary keymap", function()
-        assert.is_not_nil(kmt) -- we're going over the top here...
-        assert.is_not_nil(kmt.keymap) -- ...even more so.
+    local sleep = function(time, factor, sf, on)
+        local old = keybow.no_delay
+        keybow.no_delay = not on
+        local start = sock.gettime()
+        sf(time)
+        local delay = (sock.gettime() - start) * factor
+        keybow.no_delay = old
+        return delay
+    end
 
-        -- empty must register exactly one keymap, and it must be
-        -- a primary keymap, not permanent or secondary.
-        local kms = mb.registered_keymaps()
-        assert.is.equal(1, #kms)
-        local keymap = kms[1]
-        assert.is_falsy(keymap.permanent)
-        assert.is_falsy(keymap.secondary)
+    it("delays ms or not", function()
+        assert.is_true(sleep(10, 1000, keybow.sleep, true) >= 10)
+        assert.is_true(sleep(10, 1000, keybow.sleep, false) < 10)
     end)
 
-
-    inslit("calls press and release handlers", function()
-        local mp = spy.on(kmt.keymap[1], "press")
-        local mr = spy.on(kmt.keymap[2], "release")
-
-        hwk.tap(1)
-        assert.spy(mp).was.called(1)
-        hwk.tap(2)
-        assert.spy(mr).was.called(1)
+    it("delays us or not", function()
+        assert.is_true(sleep(10, 1000*1000, keybow.usleep, true) >= 10)
+        assert.is_true(sleep(10, 1000*1000, keybow.usleep, false) < 10)
     end)
 
 end)

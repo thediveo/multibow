@@ -24,7 +24,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-hwk = {} -- module
+local hwk = {} -- module
 
 -- Convenience: returns the name of a Keybow key handler function for the
 -- given key number.

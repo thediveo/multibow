@@ -38,7 +38,7 @@ describe("SHIFT multibow keymap", function()
         -- SHIFT must register exactly two keymaps, a primary and a secondary one.
         local kms = mb.registered_keymaps()
         assert.is.equal(#kms, 2)
-        for idx, keymap in ipairs(kms) do
+        for _, keymap in ipairs(kms) do
             if keymap == "shift" then
                 assert.is_falsy(keymap.permanent)
                 assert.is_falsy(keymap.secondary)
@@ -47,8 +47,6 @@ describe("SHIFT multibow keymap", function()
                 assert.is_true(keymap.secondary)
             end
         end
-
-        default_key_shift = shift.KEY_SHIFT
     end)
 
     inslit("accepts changes form default", function()
@@ -99,7 +97,7 @@ describe("SHIFT multibow keymap", function()
 
             -- but that SHIFT followed by another function doesn't shift.
             shift.shift_secondary_keymap:clear()
-            for idx, key in ipairs({
+            for _, key in ipairs({
                 shift.KEY_LAYOUT,
                 shift.KEY_BRIGHTNESS
             }) do
@@ -117,7 +115,7 @@ describe("SHIFT multibow keymap", function()
             }
             local keymap_shifted = {
                 name="test-shifted",
-                [0]={press=function(key) end}
+                [0]={press=function(_) end}
             }
             keymap.shift_to = keymap_shifted
             keymap_shifted.shift_to = keymap
@@ -189,7 +187,7 @@ describe("SHIFT multibow keymap", function()
                 s:clear()
                 hwk.press(shift.KEY_SHIFT)
                 assert.spy(s).was.called_with(
-                    shift.KEY_BRIGHTNESS, 
+                    shift.KEY_BRIGHTNESS,
                     shift.next_brightness_color())
                 -- cycles to next brightness
                 hwk.tap(shift.KEY_BRIGHTNESS)

@@ -23,26 +23,26 @@ SOFTWARE.
 require "mocked-keybow"
 local hwk = require("spec/hwkeys")
 
-describe("multibow routehandlers", function()
+describe("Multibow route handlers", function()
 
     -- ensure to get a fresh multibow module instance each time we run
     -- an isolated test...
     local mb
 
     local spies = mock({
-        prim_key_press=function(key) end,
-        prim_key_release=function(key) end,
-        prim_otherkey_press=function(key) end,
-        prim_otherkey_release=function(key) end,
+        prim_key_press=function(_) end,
+        prim_key_release=function(_) end,
+        prim_otherkey_press=function(_) end,
+        prim_otherkey_release=function(_) end,
 
-        sec_key_press=function(key) end,
-        sec_key_release=function(key) end,
-        
-        perm_key_press=function(key) end,
-        perm_key_release=function(key) end,
-        
-        grab_key_press=function(key) end,
-        grab_key_release=function(key) end,
+        sec_key_press=function(_) end,
+        sec_key_release=function(_) end,
+
+        perm_key_press=function(_) end,
+        perm_key_release=function(_) end,
+
+        grab_key_press=function(_) end,
+        grab_key_release=function(_) end,
     })
 
     local primary_keymap = {
@@ -67,10 +67,9 @@ describe("multibow routehandlers", function()
     }
 
     before_each(function()
-        require("keybow")
         mb = require("snippets/multibow")
         -- make sure to clear our spies
-        for name, schlapphut in pairs(spies) do
+        for _, schlapphut in pairs(spies) do
             schlapphut:clear()
         end
     end)

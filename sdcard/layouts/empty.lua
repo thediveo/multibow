@@ -1,5 +1,5 @@
--- An empty Multibow Keybow layout. Useful for "switching off" any active
--- keymaps, with only the permanent keymaps (SHIFT, etc) being still in place.
+-- An empty Multibow layout. Useful for "switching off" any active keymaps,
+-- with only the permanent keymaps (SHIFT, etc) being still in place.
 
 --[[
 Copyright 2019 Harald Albrecht
