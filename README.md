@@ -29,6 +29,13 @@ what sane reason is there to end up with a Lua-scripted multi-layout keyboard
 2. Download all files from the `sdcard/` subdirectory of this repository and
    then copy them onto the microSD card. This will overwrite but one file
    `key.lua`, all other files are new.
+   - download recent stable
+     [sdcard.zip](https://minhaskamal.github.io/DownGit/#/home?url=https://github.com/TheDiveO/multibow/tree/master/sdcard)
+     – courtesy of Minhas Kamal's incredibly useful
+     [DownGit](https://github.com/MinhasKamal/DownGit) service which lets
+     users directly download GitHub repository directories as .zip files.
+     _Please note that we're not responsible for the DownGit service and its
+     integrity, so be cautious when downloading files._
 
 ## Multiple Keyboard Layouts
 
@@ -216,7 +223,9 @@ Before your first testing, you'll need to run `./setup-tests.sh` once in order
 to install (on Ubuntu-based distributions) the required system distribution and
 LuaRocks packages.
 
-Afterwards, simply run `busted` while in the `multibow` repository root
-directory to run all tests. For instance, run `busted
-spec/layout/kdenlive_spec.lua` to unit test a specific keyboard layout (or set
-of layouts).
+Afterwards, simply run `./check.sh` while in the `multibow` repository root
+directory to run all tests and linting.
+
+If you want to just test a certain file or directory, then run `busted
+spec/layout/kdenlive_spec.lua` to unit test a specific keyboard layout
+(or set of layouts) or `busted spec/layout` to check all layouts.
