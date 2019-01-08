@@ -1,4 +1,4 @@
--- A Multibow template layout, useful for starting your own keymap layouts.
+-- A Multibow simple media player keyboard layout.
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-local km = {} -- module
+local mplay = _G.mplay or {} -- module
 
 local mb = require("snippets/multibow")
 
@@ -34,35 +34,39 @@ cable going off "northwards":
 ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
 ┊ 11 ┊  ┊  8 ┊  ┊  5 ┊  ┊  2 ┊
 └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+          🔇     🔈/🔉     🔊
 ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
 ┊ 10 ┊  ┊  7 ┊  ┊  4 ┊  ┊  1 ┊
 └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+                  ⏹️️
 ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
 ┊  9 ┊  ┊  6 ┊  ┊  3 ┊  ┊  0 ┊
 └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+          ◀️◀️      ▮▶      ▶▶
 
 ]]--
 
--- Some action on a certain key press...
-function km.mypress(keyno) -- luacheck: ignore 212
-end
+mplay.KEY_STOP = mplay.KEY_STOP or 4
+mplay.KEY_PLAYPAUSE = mplay.KEY_PLAYPAUSE or 3
+mplay.KEY_PREV = mplay.KEY_PREV or 6
+mplay.KEY_NEXT = mplay.KEY_NEXT or 0
 
--- Some action on a certain key release...
-function km.myrelease(keyno) -- luacheck: ignore 212
-end
+mplay.KEY_VOLUP = mplay.KEY_VOLUP or 2
+mplay.KEY_VOLDN = mplay.KEY_VOLDN or 5
+mplay.KEY_MUTE = mplay.KEY_MUTE or 8
 
--- The keymap layout...
-km.keymap = {
-    -- IMPORTANT: Make sure to change the keymap name to make it unique!
-    name="keymap-template",
+mplay.keymap = {
+    name="mediaplayer",
 
-    -- The index entries below are defining keys as to their LED color and
-    -- what key taps should be send to the USB host to which your Keybow is
-    -- connected to.
-    [0] = { c={r=1, g=1, b=1}, press=function() mb.tap("a") end},
-    [1] = { c={r=1, g=1, b=1}, press=km.mypress},
-    [2] = { c={r=1, g=1, b=1}, release=km.myrelease},
+    [mplay.KEY_STOP] = { c={r=1, g=0, b=0}, press=function() mb.tap(keybow.MEDIA_STOPCD) end},
+    [mplay.KEY_PLAYPAUSE] = { c={r=0, g=1, b=0}, press=function() mb.tap(keybow.MEDIA_PLAYPAUSE) end},
+    [mplay.KEY_PREV] = { c={r=0.5, g=0.5, b=1}, press=function() mb.tap(keybow.MEDIA_PREVIOUSSONG) end},
+    [mplay.KEY_NEXT] = { c={r=0, g=1, b=1}, press=function() mb.tap(keybow.MEDIA_NEXTSONG) end},
+
+    [mplay.KEY_MUTE] = { c={r=0.5, g=0.1, b=0.1}, press=function() mb.tap(keybow.MEDIA_MUTE) end},
+    [mplay.KEY_VOLDN] = { c={r=0.5, g=0.5, b=0.5}, press=function() mb.tap(keybow.MEDIA_VOLUMEDOWN) end},
+    [mplay.KEY_VOLUP] = { c={r=1, g=1, b=1}, press=function() mb.tap(keybow.MEDIA_VOLUMEUP) end},
 }
-mb.register_keymap(km.keymap)
+mb.register_keymap(mplay.keymap)
 
-return km -- module
+return mplay -- module

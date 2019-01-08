@@ -45,6 +45,7 @@ follows:
 
 ```lua
 require "layouts/shift" -- for cycling between layouts.
+require "layouts/media-player" -- indispensable media player controls.
 require "layouts/vsc-golang" -- debugging Go programs in VisualStudio Code.
 require "layouts/kdenlive" -- editing video using Kdenlive.
 require "layouts/empty" -- empty, do-nothing layout.
@@ -60,6 +61,27 @@ The default setup activates the following macro keyboard layouts shown below.
 > You can switch (cycle) between them by pressing and holding key #11
 > (top-left key in landscape), then tapping key #5 (immediately right to #11),
 > and finally releasing both keys.
+
+### Media Player Controls
+
+We start with the probably indispensable media player controls keyboard layout.
+'nuff said.
+
+```text
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊ 11 ┊  ┊  8 ┊  ┊  5 ┊  ┊  2 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+          🔇     🔈/🔉     🔊
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊ 10 ┊  ┊  7 ┊  ┊  4 ┊  ┊  1 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+                  ⏹️️
+┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
+┊  9 ┊  ┊  6 ┊  ┊  3 ┊  ┊  0 ┊
+└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
+          ◀️◀️      ▮▶      ▶▶
+```
+
 
 ### Debug Go in VisualStudio Code
 
@@ -163,7 +185,7 @@ You may want to start from our template in `layouts/keymap-template.lua`.
 
 3. add key definitions for colors and handlers as necessary, see next for examples.
 
-    * you can specify key handlers either "inline", as you can see from the
+    - you can specify key handlers either "inline", as you can see from the
       example mapping for key #0:
 
       ```lua
@@ -176,7 +198,7 @@ You may want to start from our template in `layouts/keymap-template.lua`.
       This sets the key #0's LED color to white, and emits an "a" press everytime
       you tap key #0.
 
-    * for more complex handling, you may want to use a dedicated function instead:
+    - for more complex handling, you may want to use a dedicated function instead:
 
       ```lua
       function km.mypress(keyno)
@@ -188,7 +210,7 @@ You may want to start from our template in `layouts/keymap-template.lua`.
         [1] = { c={r=1, g=1, b=1}, press=km.mypress}
       }
 
-    * you can also do things on key releases:
+    - you can also do things on key releases:
 
       ```lua
       km.keymap = {
