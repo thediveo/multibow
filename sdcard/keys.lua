@@ -1,5 +1,6 @@
 require "keybow"
 require "layouts/shift"
+require "layouts/media-player"
 require "layouts/vsc-golang"
 require "layouts/kdenlive"
 require "layouts/empty"
