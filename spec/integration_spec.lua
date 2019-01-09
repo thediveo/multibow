@@ -54,7 +54,7 @@ describe("final Multibow integration", function()
         -- order of keymap imports.
         mb.activate_keymap(vscgolang.keymap.name)
         assert.is.equal(vscgolang.keymap.name, mb.current_keymap.name)
-        assert.is.equal(vscgolang.debug_continue, vscgolang.keymap[vscgolang.KEY_CONT].press)
+        assert.is.equal(vscgolang.go_test_package, vscgolang.keymap[vscgolang.KEY_TESTPKG].press)
 
         -- Checks that a press of the "Continue Debugging" key does in fact
         -- trigger the corresponding keymap handler.

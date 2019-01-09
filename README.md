@@ -82,32 +82,35 @@ We start with the probably indispensable media player controls keyboard layout.
           ◀️◀️      ▮▶      ▶▶
 ```
 
-
 ### Debug Go in VisualStudio Code
 
 Debug Go programs and packages in VisualStudio Code with its Go extension.
 
 ```text
-┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
-┊ 11 ┊  ┊  8 ┊  ┊  5 ┊  ┊  2 ┊
-└╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
-
-╔════╗  ╔════╗  ┌╌╌╌╌┐  ╔════╗
-║ 10 ║  ║  7 ║  ┊  4 ┊  ║  1 ║
-╚════╝  ╚════╝  └╌╌╌╌┘  ╚════╝
-⏹STOP   ↺RELOAD         ☑TSTPKG
+┌╌╌╌╌┐  ╔════╗  ╔════╗  ╔════╗
+┊ 11 ┊  ║  8 ║  ║  5 ║  ║  2 ║
+└╌╌╌╌┘  ╚════╝  ╚════╝  ╚════╝
+        OUTPUT  DEBUG   CLOSE PANEL
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║ 10 ║  ║  7 ║  ║  4 ║  ║  1 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+  ▶    ⏹STOP   ↺RELOAD  TSTPKG
 ╔════╗  ╔════╗  ╔════╗  ╔════╗
 ║  9 ║  ║  6 ║  ║  3 ║  ║  0 ║
 ╚════╝  ╚════╝  ╚════╝  ╚════╝
-  ▮▶    ⭢STEP   ⮧INTO   ⮥OUT
+  ▮▶    ⮧INTO   ⭢STEP   ⮥OUT
 ```
 
-* ▮▶ starts, continues, or pauses the program to be debugged.
-* ⮧INTO steps _into_ a function call.
-* ⭢STEP steps _over_ a line/function call.
-* ⏹STOP stops debugging
-* ↺RELOAD reloads the program being debugged.
-* ☑TSTPKG activates the command "go: test package".
+- ▶ starts the program without debugging.
+- ▮▶ starts, continues, or pauses the program to be debugged.
+- ⮧INTO steps _into_ a function call.
+- ⭢STEP steps _over_ a line/function call.
+- ⏹STOP stops debugging
+- ↺RELOAD reloads the program being debugged.
+- ☑TSTPKG activates the command "go: test package".
+- OUTPUT opens/shows output panel.
+- DEBUG opens/shows debug panel.
+- CLOSE PANEL ... closes the output/debug panel.
 
 ### Kdenlive Video Editor
 
@@ -141,10 +144,10 @@ layouts that are SHIFT-aware.
 └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
 ```
 
-* press ⇑SHIFT, release ⇑SHIFT: if a keyboard layout has a SHIFT layer, then
+- press ⇑SHIFT, release ⇑SHIFT: if a keyboard layout has a SHIFT layer, then
   this activates and deactivates this ⇑SHIFT layer.
-* press ⇑SHIFT, tap →LAYOUT, release ⇑SHIFT: switches to next keyboard layout.
-* press ⇑SHIFT, tap 🔆BRIGHT, release 🔆BRIGHT: changes the keyboard LED
+- press ⇑SHIFT, tap →LAYOUT, release ⇑SHIFT: switches to next keyboard layout.
+- press ⇑SHIFT, tap 🔆BRIGHT, release 🔆BRIGHT: changes the keyboard LED
   brightness in three different brightness steps (70% → 100% → 40% → 70% →
   ...).
 
