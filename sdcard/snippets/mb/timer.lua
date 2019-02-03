@@ -20,39 +20,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-local pq = require("snippets/mb/prioqueue")
+-- luacheck: globals mb tick
 
-describe("prioqueue", function()
+-- Our timer queue ... is nothing more than a priority queue.
+mb.timers = mb.pq:new()
+mb.now = 0
 
-    it("adds and peeks", function()
-        local q = pq.new()
-        q:add(200, "foo")
-        q:add(100, "bar1")
-        q:add(300, "zoo")
-        q:add(100, "bar2")
+-- Activates the given timer user function after a certain amount of time has
+-- passed.
+function mb.after(afterms, timerf)
+    afterms = afterms < 0 and 0 or afterms
+    mb.timers:add(mb.now + afterms, timerf)
+end
 
-        assert.is.equal(4, q.size)
-
-        local p, v = q:peek()
-        assert.is.same({100, "bar1"}, {p, v})
-
-        p, v = q:remove()
-        assert.is.same({100, "bar1"}, {p, v})
-
-        q:add(100, "bar3")
-
-        p, v = q:remove()
-        assert.is.same({100, "bar2"}, {p, v})
-        p, v = q:remove()
-        assert.is.same({100, "bar3"}, {p, v})
-        p, v = q:remove()
-        assert.is.same({200, "foo"}, {p, v})
-        p, v = q:remove()
-        assert.is.same({300, "zoo"}, {p, v})
-
-        p, v = q:peek()
-        assert.is.falsy(p)
-        assert.is.falsy(v)
-    end)
-
-end)
+-- Tick gets called by the Keybow "firmware" every 1ms (or so). If any timers
+-- have gone off by now, then call their timer user functions. Keybow's tick
+-- ms counter has its epoch set when the Keybow Lua scripting started (so it's
+-- not a *nix timestamp or such).
+function tick(t)
+    mb.now = t
+    while true do
+        local next, timerf = mb.timers:peek()
+        if next == nil or t < next then
+            break
+        end
+        mb.timers:remove()
+        timerf(t)
+    end
+end

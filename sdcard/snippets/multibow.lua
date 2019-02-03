@@ -31,6 +31,8 @@ require "keybow"
 -- Pulls in the individual modules that make up Multibow.
 mb.path = (...):match("^(.-)[^%/]+$")
 
+mb.pq = require(mb.path .. "mb/prioqueue")
+require(mb.path .. "mb/timer")
 require(mb.path .. "mb/morekeys")
 require(mb.path .. "mb/keymaps")
 require(mb.path .. "mb/keys")
