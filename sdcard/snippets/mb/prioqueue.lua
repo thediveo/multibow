@@ -24,6 +24,7 @@ local pq = {}
 
 pq.__index = pq
 
+-- Creates a new priority queue.
 -- luacheck: ignore 212/self
 function pq:new()
     local slf = {}
@@ -33,6 +34,9 @@ function pq:new()
     return slf
 end
 
+-- Returns the foremost (minimum) element (priority, value) from the priority
+-- queue, without removing it from the priority queue. If the queue is empty,
+-- then the element returned will be (nil, nil).
 function pq:peek()
     if self.size > 0 then
         return self.heap[1].priority, self.heap[1].value
@@ -40,6 +44,8 @@ function pq:peek()
     return nil, nil
 end
 
+-- Adds another element (priority, value) to the priority queue. It's perfectly
+-- fine to add multiple elements of the same priority.
 function pq:add(priority, value)
     self.size = self.size + 1
     self.heap[self.size] = {priority=priority, value=value}
@@ -54,6 +60,7 @@ function pq:add(priority, value)
     end
 end
 
+-- Removes the foremost (minimum) element from the priority queue.
 function pq:remove()
     if self.size == 0 then
         return nil, nil
@@ -75,12 +82,45 @@ function pq:remove()
     return pv.priority, pv.value
 end
 
+-- Returns the index for the smaller child of heap element i.
 function pq:minchild(i)
     local i2 = i*2
     if i2+1 > self.size then
         return i2
     end
     return self.heap[i2].priority < self.heap[i2+1].priority and i2 or i2+1
+end
+
+-- Searches for a specific element of (priority, value) and returns its index
+-- within the heap. If multiple elements of (priority, value) exist, then the
+-- index of an arbitrary one of these elements will be returned.
+function pq:search(priority, value)
+    for i = 1,self.size do
+        if self.heap[i].priority == priority and self.heap[i].value == value then
+            return i
+        end
+    end
+    return nil
+end
+
+-- Deletes all elements of (priority, value) from the priority queue.
+function pq:del(priority, value, quick)
+    quick = quick ~= nil and quick or true
+    repeat
+        local i = pq:search(priority, value)
+        if i == nil then
+            return
+        end
+        -- reset element to lowest priority, then let it swim up.
+        self.heap[i].priority = -1
+        while math.floor(i/2) > 0 do
+            local half = math.floor(i/2)
+            if self.heap[i].priority < self.heap[half].priority then
+                self.heap[i], self.heap[half] = self.heap[half], self.heap[i]
+            end
+            i = half
+        end
+    until not quick
 end
 
 return pq
