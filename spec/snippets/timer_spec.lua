@@ -93,4 +93,18 @@ describe("multibow timers", function()
         assert.spy(trigger).was_not.called()
     end)
 
+    it("goes on, and on, and on...", function()
+        local trigger = spy.new(function() end)
+        local timer = mb.every(20, trigger, 1, 2, 3)
+
+        ticktock(50)
+        assert.spy(trigger).was.called(2)
+        assert.spy(trigger).was.called_with(1, 2, 3)
+
+        trigger:clear()
+        timer:cancel()
+        ticktock(50)
+        assert.spy(trigger).was_not.called()
+    end)
+
 end)

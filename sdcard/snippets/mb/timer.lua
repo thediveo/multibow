@@ -34,7 +34,8 @@ Timer.__index = Timer
 -- Cancels a timer, regardless of whether it has already been triggered, or
 -- not.
 function Timer:cancel()
-    if self.at >= 0 then
+    if self:isarmed() then
+        -- Don't forget to remove ourselves if we were still armed.
         mb.timers:delete(self.at, self.timerf)
         self.at = math.mininteger
     end
@@ -62,12 +63,33 @@ end
 function mb.after(afterms, timerf, ...)
     local at = mb.now + (afterms < 0 and 0 or afterms)
     local tim = {
-        timerf = timerf,
         at = at,
+        timerf = timerf,
         targs = {...}
     }
     setmetatable(tim, Timer)
     mb.timers:add(at, tim)
+    return tim
+end
+
+-- Triggers a timer every specified ms until it finally gets canceled. Please
+-- note that the trigger will trigger for the first time only after "everyms",
+-- but not immediately.
+function mb.every(everyms, timerf, ...)
+    local shim = {
+        everyms = everyms < 1 and 1 or everyms,
+        timerf = timerf,
+        targs = {...}
+    }
+    local tim = mb.after(
+        everyms, 
+        function(shim)
+            shim.timerf(table.unpack(shim.targs))
+            shim.tim.at = mb.now + everyms
+            mb.timers:add(shim.tim.at, shim.tim)
+        end,
+        shim)
+    shim.tim = tim
     return tim
 end
 
