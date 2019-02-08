@@ -235,7 +235,7 @@ The file `keybow.lua` included from
 testing purposes is licensed under the MIT license, as declared by Pimoroni's
 keybow-firmware GitHub repository.
 
-## Developing
+## Developing/Hacking
 
 Whether you want to dry-run your own keyboard layout or to hack Multibow: use
 the unit tests which you can find in the `spec/` subdirectory. These tests
@@ -248,8 +248,17 @@ Before your first testing, you'll need to run `./setup-tests.sh` once in order
 to install (on Ubuntu-based distributions) the required system distribution and
 LuaRocks packages.
 
-Afterwards, simply run `./check.sh` while in the `multibow` repository root
-directory to run all tests and linting.
+### Visual Studio Code
+
+There's a [Visual Studio Code](https://code.visualstudio.com/) workspace
+`multibow.code-workspace` in the `.vscode/` directory inside this repository.
+It defines a default build task which lints everything, as well as a default
+test task which runs all tests.
+
+### Shell
+
+After having run `./setup-tests.sh` once, simply run `./check.sh` while in the
+`multibow` repository root directory to run all tests and linting.
 
 If you want to just test a certain file or directory, then run `busted
 spec/layout/kdenlive_spec.lua` to unit test a specific keyboard layout

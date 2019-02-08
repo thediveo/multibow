@@ -60,12 +60,13 @@ function pq:add(priority, value)
     end
 end
 
--- Removes the foremost (minimum) element from the priority queue.
+-- Removes the foremost (minimum) element from the priority queue and returns
+-- it as (priority, value).
 function pq:remove()
     if self.size == 0 then
         return nil, nil
     end
-    local pv = self.heap[1]
+    local min = self.heap[1]
     self.heap[1] = self.heap[self.size]
     self.heap[self.size] = nil
     self.size = self.size - 1
@@ -79,7 +80,7 @@ function pq:remove()
         i = minchild
     end
     --
-    return pv.priority, pv.value
+    return min.priority, min.value
 end
 
 -- Returns the index for the smaller child of heap element i.
@@ -103,24 +104,27 @@ function pq:search(priority, value)
     return nil
 end
 
--- Deletes all elements of (priority, value) from the priority queue.
-function pq:del(priority, value, quick)
-    quick = quick ~= nil and quick or true
-    repeat
-        local i = pq:search(priority, value)
-        if i == nil then
-            return
+-- Deletes the element (priority, value) from the priority queue. If there are
+-- multiple elements of (priority, value) in the head, then only an arbitrary
+-- one of them will be removed. As an indication, the element removed will be
+-- returned, otherwise nil.
+function pq:delete(priority, value)
+    local i = self:search(priority, value)
+    if i == nil then
+        return nil
+    end
+    -- reset element to lowest priority, then let it swim up, so it will be
+    -- removed the next time the min element is to be removed from the queue.
+    self.heap[i].priority = math.mininteger
+    while math.floor(i/2) > 0 do
+        local half = math.floor(i/2)
+        if self.heap[i].priority < self.heap[half].priority then
+            self.heap[i], self.heap[half] = self.heap[half], self.heap[i]
         end
-        -- reset element to lowest priority, then let it swim up.
-        self.heap[i].priority = -1
-        while math.floor(i/2) > 0 do
-            local half = math.floor(i/2)
-            if self.heap[i].priority < self.heap[half].priority then
-                self.heap[i], self.heap[half] = self.heap[half], self.heap[i]
-            end
-            i = half
-        end
-    until not quick
+        i = half
+    end
+    local _, v = self:remove()
+    return priority, v
 end
 
 return pq

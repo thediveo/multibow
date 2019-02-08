@@ -26,11 +26,49 @@ SOFTWARE.
 mb.timers = mb.pq:new()
 mb.now = 0
 
+-- Private Timer class stores information about a specific timer and allows
+-- applications to later cancel them.
+local Timer = {}
+Timer.__index = Timer
+
+-- Cancels a timer, regardless of whether it has already been triggered, or
+-- not.
+function Timer:cancel()
+    if self.at >= 0 then
+        mb.timers:delete(self.at, self.timerf)
+        self.at = math.mininteger
+    end
+end
+
+-- Calls the timer's user function with its user arguments and then disables
+-- this timer.
+function Timer:trigger()
+    if self.at >= 0 then
+        self.at = math.mininteger
+        if self.timerf then
+            self.timerf(table.unpack(self.targs))
+        end
+    end
+end
+
+-- Returns true if the timer is still running and hasn't triggered yet;
+-- otherwise, it returns false.
+function Timer:isarmed()
+    return self.at >= 0
+end
+
 -- Activates the given timer user function after a certain amount of time has
--- passed.
-function mb.after(afterms, timerf)
-    afterms = afterms < 0 and 0 or afterms
-    mb.timers:add(mb.now + afterms, timerf)
+-- passed. Returns a timer object that can be used to cancel the timer.
+function mb.after(afterms, timerf, ...)
+    local at = mb.now + (afterms < 0 and 0 or afterms)
+    local tim = {
+        timerf = timerf,
+        at = at,
+        targs = {...}
+    }
+    setmetatable(tim, Timer)
+    mb.timers:add(at, tim)
+    return tim
 end
 
 -- Tick gets called by the Keybow "firmware" every 1ms (or so). If any timers
@@ -40,11 +78,11 @@ end
 function tick(t)
     mb.now = t
     while true do
-        local next, timerf = mb.timers:peek()
+        local next, tim = mb.timers:peek()
         if next == nil or t < next then
             break
         end
         mb.timers:remove()
-        timerf(t)
+        tim:trigger()
     end
 end

@@ -11,6 +11,7 @@
 		},
 		"lua.format.lineWidth": 80,
 		"lua.luacheckPath": "luacheck",
-		"lua.preferLuaCheckErrors": true
+		"lua.preferLuaCheckErrors": true,
+		"lua.targetVersion": "5.3"
 	}
 }

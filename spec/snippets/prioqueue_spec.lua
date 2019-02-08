@@ -55,4 +55,23 @@ describe("prioqueue", function()
         assert.is.falsy(v)
     end)
 
+    it("adds and removes", function()
+        local q = pq.new()
+        q:add(200, "foo")
+        q:add(100, "bar")
+        q:add(300, "zoo")
+
+        assert.is.falsy(q:delete(42, "douglas.a"))
+        assert.is.equal(3, q.size)
+
+        local p, v = q:delete(200, "foo")
+        assert.is.same({200, "foo"}, {p, v})
+        assert.is.equal(2, q.size)
+
+        p, v = q:remove()
+        assert.is.same({100, "bar"}, {p, v})
+        p, v = q:remove()
+        assert.is.same({300, "zoo"}, {p, v})
+    end)
+
 end)
