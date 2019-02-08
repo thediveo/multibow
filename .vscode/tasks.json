@@ -10,8 +10,8 @@
                 "isDefault": true
             },
             "type": "shell",
-            "command": "luacheck",
-            "args": ["-q", "./sdcard", "./spec"],
+            "command": "${workspaceFolder}/env.sh",
+            "args": ["luacheck", "-q", "./sdcard", "./spec"],
             "presentation": {
                 "echo": true,
                 "reveal": "always",
@@ -28,8 +28,8 @@
                 "isDefault": true
             },
             "type": "shell",
-            "command": "busted",
-            "args": [],
+            "command": "${workspaceFolder}/env.sh",
+            "args": ["busted"],
             "presentation": {
                 "echo": true,
                 "reveal": "always",

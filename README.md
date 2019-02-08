@@ -244,9 +244,9 @@ rinse-and-repeat cycle with copying to microSD card, starting the Keybow
 hardware, and then wondering what went wrong, without any real clue as to what
 is the cause of failure.
 
-Before your first testing, you'll need to run `./setup-tests.sh` once in order
-to install (on Ubuntu-based distributions) the required system distribution and
-LuaRocks packages.
+> **Note:** before `check.sh` runs all tests and lints multibow, it installs
+> a local Lua 5.3 environment including luarocks and the required luarock packages,
+> if not already done so. This local environment will be placed into `./env`.
 
 ### Visual Studio Code
 
@@ -257,9 +257,9 @@ test task which runs all tests.
 
 ### Shell
 
-After having run `./setup-tests.sh` once, simply run `./check.sh` while in the
-`multibow` repository root directory to run all tests and linting.
+Simply run `./check.sh` while in the `multibow` repository root directory to run
+all tests and linting.
 
 If you want to just test a certain file or directory, then run `busted
 spec/layout/kdenlive_spec.lua` to unit test a specific keyboard layout
-(or set of layouts) or `busted spec/layout` to check all layouts.
+(or set of layouts) or `./env.sh busted spec/layouts` to check all layouts.
