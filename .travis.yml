@@ -8,7 +8,7 @@ branches:
   only:
     - /.*/
 
-before_install:
+install:
   - ./env.sh # installs the local environment.
 
 script:
