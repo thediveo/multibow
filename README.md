@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/TheDiveO/multibow.svg?branch=feature%2Ftimer)](https://travis-ci.org/TheDiveO/multibow)
+
 # Multibow
 
 Find it on GitHub:
