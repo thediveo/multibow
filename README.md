@@ -1,4 +1,7 @@
 [![Build Status](https://travis-ci.org/TheDiveO/multibow.svg?branch=feature%2Ftimer)](https://travis-ci.org/TheDiveO/multibow)
+![Version](https://img.shields.io/github/tag/thediveo/multibow.svg?style=flat)
+![License](https://img.shields.io/github/license/thediveo/multibow.svg?style=flat)
+![Lua](https://img.shields.io/badge/Lua-5.3-blue.svg?style=flat)
 
 # Multibow
 
