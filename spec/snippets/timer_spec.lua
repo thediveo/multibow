@@ -22,14 +22,7 @@ SOFTWARE.
 
 require "mocked-keybow"
 local mb = require("snippets/multibow")
-
-local ticktock = function(ms)
-    local delta = 10
-    local now = mb.now
-    for passed = delta,ms,delta do
-        _G["tick"](now + passed)
-    end
-end
+local tt = require("spec/snippets/ticktock")
 
 describe("multibow timers", function()
 
@@ -39,7 +32,7 @@ describe("multibow timers", function()
 
     it("ticks", function()
         assert.is.equal(mb.now, 0)
-        ticktock(100)
+        tt.ticktock(100)
         assert.is.equal(mb.now, 100)
     end)
 
@@ -47,17 +40,17 @@ describe("multibow timers", function()
         local trigger = spy.new(function() end)
         local timer = mb.after(100, trigger, 1, 2, 3)
 
-        ticktock(50)
+        tt.ticktock(50)
         assert.spy(trigger).was_not.called()
         assert.is.truthy(timer:isarmed())
-        ticktock(200)
+        tt.ticktock(200)
         assert.spy(trigger).was.called(1)
         assert.spy(trigger).was.called_with(1, 2, 3)
         assert.is.falsy(timer:isarmed())
 
         trigger:clear()
         mb.after(-1, trigger)
-        ticktock(100)
+        tt.ticktock(100)
         assert.spy(trigger).was.called(1)
     end)
 
@@ -67,12 +60,12 @@ describe("multibow timers", function()
         mb.after(100, t2)
         mb.after(50, t1)
 
-        ticktock(60)
+        tt.ticktock(60)
         assert.spy(t1).was.called(1)
         assert.spy(t2).was_not.called()
 
         t1:clear()
-        ticktock(50)
+        tt.ticktock(50)
         assert.spy(t1).was_not.called()
         assert.spy(t2).was.called(1)
     end)
@@ -81,15 +74,15 @@ describe("multibow timers", function()
         local trigger = spy.new(function() end)
         local timer = mb.after(100, trigger, 1, 2, 3)
 
-        ticktock(50)
+        tt.ticktock(50)
         assert.is.truthy(timer:isarmed())
         timer:cancel()
         assert.is.falsy(timer:isarmed())
-        ticktock(60)
+        tt.ticktock(60)
         assert.spy(trigger).was_not.called()
 
         timer:cancel()
-        ticktock(10)
+        tt.ticktock(10)
         assert.spy(trigger).was_not.called()
     end)
 
@@ -97,13 +90,13 @@ describe("multibow timers", function()
         local trigger = spy.new(function() end)
         local timer = mb.every(20, trigger, 1, 2, 3)
 
-        ticktock(50)
+        tt.ticktock(50)
         assert.spy(trigger).was.called(2)
         assert.spy(trigger).was.called_with(1, 2, 3)
 
         trigger:clear()
         timer:cancel()
-        ticktock(50)
+        tt.ticktock(50)
         assert.spy(trigger).was_not.called()
     end)
 

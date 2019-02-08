@@ -63,8 +63,12 @@ function mb.register_keymap(keymap)
     -- (albeit the LEDs will only update later). Also maintain the (ordered)
     -- sequence of registered primary keymaps.
     if not (keymap.permanent or keymap.secondary) then
+        local ckm = mb.current_keymap
         mb.current_keymap = mb.current_keymap or keymap
         table.insert(mb.primary_keymaps, keymap)
+        if ckm and ckm.activate then
+            ckm.activate()
+        end
     end
 end
 
@@ -132,11 +136,17 @@ end
 -- Activates a specific keymap by name. Please note that it isn't necessary
 -- to "activate" permanent keymaps at all (and thus this deed cannot be done).
 function mb.activate_keymap(name)
+    if mb.current_keymap and mb.current_keymap.deactivate then
+        mb.current_keymap.deactivate()
+    end
     name = type(name) == "table" and name.name or name
     local keymap = mb.keymaps[name]
     if keymap and not keymap.permanent then
         mb.current_keymap = keymap
         mb.activate_leds()
+        if keymap.activate then
+            keymap.activate()
+        end
     end
 end
 

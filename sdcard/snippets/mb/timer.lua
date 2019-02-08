@@ -81,10 +81,16 @@ function mb.every(everyms, timerf, ...)
         timerf = timerf,
         targs = {...}
     }
+    -- add an alarm after the first period which then triggers our shim
+    -- function; only the shim function will then trigger the user function,
+    -- and also readd the (shim) alarm so that the cycle will repeat ad
+    -- nauseam.
     local tim = mb.after(
-        everyms, 
-        function(shim)
-            shim.timerf(table.unpack(shim.targs))
+        everyms,
+        function(shim) -- luacheck: ignore 431/shim
+            if shim.timerf then
+                shim.timerf(table.unpack(shim.targs))
+            end
             shim.tim.at = mb.now + everyms
             mb.timers:add(shim.tim.at, shim.tim)
         end,
