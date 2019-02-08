@@ -1,3 +1,5 @@
+-- Multibow internal "module" implementing timer/alarm-related functionality.
+
 --[[
 Copyright 2019 Harald Albrecht
 

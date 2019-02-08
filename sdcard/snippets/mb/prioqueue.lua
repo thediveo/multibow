@@ -1,3 +1,6 @@
+-- Multibow internal "module" implementing a simple min priority queue, to be
+-- used for alarm/timer functionality.
+
 --[[
 Copyright 2019 Harald Albrecht
 
