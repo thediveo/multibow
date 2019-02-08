@@ -1,6 +1,7 @@
 # As there is (still) no Travis Lua language support, we use the fine
 # https://github.com/mpeterv/hererocks local environment build to set
 # up a local Lua/luarocks/packages environment.
+dist: xenial
 language: python
 python: 3.7
 sudo: false
