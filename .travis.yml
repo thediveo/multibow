@@ -4,6 +4,10 @@
 language: python
 sudo: false
 
+branches:
+  only:
+    - /.*/
+
 before_install:
   - ./env.sh # installs the local environment.
 
