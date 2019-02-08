@@ -59,7 +59,7 @@ end
 
 function glow.led()
     t = t + every
-    brightness = 0.5 * (1 - math.cos(t/1000*math.pi))
+    local brightness = 0.5 * (1 - math.cos(t/1000*math.pi))
     mb.led(0, {r=brightness, g=brightness, b=brightness})
 end
 

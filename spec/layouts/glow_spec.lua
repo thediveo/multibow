@@ -21,11 +21,11 @@ SOFTWARE.
 ]]--
 
 require "mocked-keybow"
+local mb = require("snippets/multibow")
 local tt = require("spec/snippets/ticktock")
 
 describe("template multibow keymap", function()
 
-    local mb = require("snippets/multibow")
     local glow
 
     before_each(function()
