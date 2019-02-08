@@ -1,0 +1,15 @@
+# As there is (still) no Travis Lua language support, we use the fine
+# https://github.com/mpeterv/hererocks local environment build to set
+# up a local Lua/luarocks/packages environment.
+language: python
+sudo: false
+
+branches:
+  only:
+    - /.*/
+
+before_install:
+  - ./env.sh # installs the local environment.
+
+script:
+  - ./env.sh busted # runs all tests.
