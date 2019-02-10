@@ -52,6 +52,7 @@ rock luasec
 rock busted
 rock luasocket
 rock luacheck
+rock cluacov
 
 # Finally check if a command with args should be run from inside the Lua
 # environment.
