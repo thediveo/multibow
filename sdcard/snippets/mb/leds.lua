@@ -58,7 +58,7 @@ end
 function mb.led(keyno, color)
     if color then
         local b = mb.brightness * 255
-        keybow.set_pixel(keyno, color.r * b, color.g * b, color.b * b)
+        keybow.set_pixel(keyno, math.floor(color.r * b), math.floor(color.g * b), math.floor(color.b * b))
     else
         keybow.set_pixel(keyno, 0, 0, 0)
     end

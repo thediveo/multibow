@@ -28,8 +28,7 @@
                 "isDefault": true
             },
             "type": "shell",
-            "command": "${workspaceFolder}/env.sh",
-            "args": ["busted"],
+            "command": "${workspaceFolder}/env.sh busted && sed -n \"/^Total/p\" ${workspaceFolder}/luacov.report.out",
             "presentation": {
                 "echo": true,
                 "reveal": "always",

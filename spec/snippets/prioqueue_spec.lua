@@ -74,4 +74,11 @@ describe("prioqueue", function()
         assert.is.same({300, "zoo"}, {p, v})
     end)
 
+    it("removes nothing", function()
+        local q = pq.new()
+        local p, v = q:remove()
+        assert.is.Nil(p)
+        assert.is.Nil(v)
+    end)
+
 end)

@@ -67,4 +67,17 @@ describe("multibow LEDs", function()
         assert.spy(s).was.called_with(1, {r=1, g=1, b=1})
     end)
 
+    inslit("sets keybow LED", function()
+        local s = spy.on(keybow, "set_pixel")
+
+        mb.set_brightness(0.5)
+        mb.led(0, {r=0, g=1, b=0})
+        assert.spy(s).was.called(1)
+        assert.spy(s).was.called_with(0, 0, 127, 0)
+
+        s:clear()
+        mb.led(0)
+        assert.spy(s).was.called_with(0, 0, 0, 0)
+    end)
+
 end)

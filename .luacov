@@ -26,7 +26,7 @@ return {
     runreport=true,
     deletestats=true,
     exclude={
-        "./env",
-        "./spec"
+        "env",
+        "spec"
     }
 }

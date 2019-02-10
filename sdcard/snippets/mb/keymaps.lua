@@ -66,8 +66,10 @@ function mb.register_keymap(keymap)
         local ckm = mb.current_keymap
         mb.current_keymap = mb.current_keymap or keymap
         table.insert(mb.primary_keymaps, keymap)
-        if ckm and ckm.activate then
-            ckm.activate()
+        -- if this is the first keymap to get activated, don't forget to
+        -- call its activation hook.
+        if ckm == nil and keymap.activate then
+            keymap.activate()
         end
     end
 end
