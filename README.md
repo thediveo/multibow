@@ -1,7 +1,8 @@
+![RPi pHAT](https://img.shields.io/badge/RPi_pHAT-Keybow-C51A4A.svg?style=flat&logo=raspberrypi)
 [![Build Status](https://travis-ci.org/TheDiveO/multibow.svg?branch=feature%2Ftimer)](https://travis-ci.org/TheDiveO/multibow)
 ![Version](https://img.shields.io/github/tag/thediveo/multibow.svg?style=flat)
 ![License](https://img.shields.io/github/license/thediveo/multibow.svg?style=flat)
-![Lua](https://img.shields.io/badge/Lua-5.3-blue.svg?style=flat)
+![Lua](https://img.shields.io/badge/Lua-5.3-2C2D72.svg?style=flat&logo=lua)
 
 # Multibow
 
