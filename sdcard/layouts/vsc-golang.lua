@@ -85,6 +85,7 @@ vscgo.COLOR_CLOSEPANEL = vscgo.COLOR_CLOSEPANEL or vscgo.RED
 
 -- AND NOW FOR SOMETHING DIFFERENT: THE REAL MEAT --
 
+-- luacov: disable
 function vscgo.command(cmd)
     mb.tap("P", keybow.LEFT_SHIFT, keybow.LEFT_CTRL)
     keybow.sleep(100)
@@ -95,6 +96,7 @@ end
 function vscgo.go_test_package(_)
     vscgo.command("go test package")
 end
+-- luacov: enable
 
 -- luacheck: ignore 631
 vscgo.keymap = {

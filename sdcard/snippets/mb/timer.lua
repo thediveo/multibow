@@ -22,7 +22,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
--- luacheck: globals mb tick
+-- luacheck: globals mb
 
 -- Our timer queue ... is nothing more than a priority queue.
 mb.timers = mb.pq:new()
@@ -99,20 +99,4 @@ function mb.every(everyms, timerf, ...)
         shim)
     shim.tim = tim
     return tim
-end
-
--- Tick gets called by the Keybow "firmware" every 1ms (or so). If any timers
--- have gone off by now, then call their timer user functions. Keybow's tick
--- ms counter has its epoch set when the Keybow Lua scripting started (so it's
--- not a *nix timestamp or such).
-function tick(t)
-    mb.now = t
-    while true do
-        local next, tim = mb.timers:peek()
-        if next == nil or t < next then
-            break
-        end
-        mb.timers:remove()
-        tim:trigger()
-    end
 end

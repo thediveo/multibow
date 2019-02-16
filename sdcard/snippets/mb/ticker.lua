@@ -1,5 +1,4 @@
--- "Multibow" is a Lua module for Pimoroni's Keybow firmware that offers and
--- manages multiple keyboard layouts.
+-- Multibow internal "module" handling Keybow's tick events.
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -23,35 +22,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
--- luacheck: globals mb
-mb = mb or {} -- module
-
-require "keybow"
-
--- Pulls in the individual modules that make up Multibow.
-mb.path = (...):match("^(.-)[^%/]+$")
-
-mb.pq = require(mb.path .. "mb/prioqueue")
-require(mb.path .. "mb/ticker")
-require(mb.path .. "mb/timer")
-require(mb.path .. "mb/morekeys")
-require(mb.path .. "mb/keymaps")
-require(mb.path .. "mb/keys")
-require(mb.path .. "mb/routehandlers")
-require(mb.path .. "mb/leds")
+-- luacheck: globals mb tick
 
 
--- Disables the automatic Keybow lightshow and sets the key LED colors. This
--- is a well-known (hook) function that gets called by the Keybow firmware
--- after initialization immediately before waiting for key events.
--- luacheck: globals setup
-function setup()
-  -- Disables the automatic keybow lightshow and switches all key LEDs off
-  -- because the LEDs might be in a random state after power on.
-  keybow.auto_lights(false)
-  keybow.clear_lights()
-  mb.activate_leds()
+-- Tick gets called by the Keybow "firmware" every 1ms (or so). If any timers
+-- have gone off by now, then call their timer user functions. Keybow's tick
+-- ms counter has its epoch set when the Keybow Lua scripting started (so it's
+-- not a *nix timestamp or such). In addition to timers, we also handle queued
+-- ticking objects here: these are always processed in sequence, and each such
+-- ticking object may consume multiple ticks until it has finished its job.
+function tick(t)
+    mb.now = t
+    while true do
+        local next, tim = mb.timers:peek()
+        if next == nil or t < next then
+            break
+        end
+        mb.timers:remove()
+        tim:trigger()
+    end
+    mb.tickkey(t)
 end
-
-
-return mb -- module

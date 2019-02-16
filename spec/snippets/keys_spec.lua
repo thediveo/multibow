@@ -67,3 +67,69 @@ describe("multibow keys", function()
     end)
 
 end)
+
+describe("asynchronous keys", function()
+
+    local tt = require("spec/snippets/ticktock")
+
+    it("map a function on a ticking element sequence", function()
+        local s = stub.new()
+        local tm1 = mb.TickMapper:new(s, 1, 2, 3)
+        local t = stub.new()
+        local tm2 = mb.TickMapper:new(t, 42)
+
+        mb.addkeyticker(tm1, 20)
+        mb.addkeyticker(tm2, 100)
+
+        -- "empty tick", as the tick mapper is yet delayed...
+        tt.ticktock(10)
+        assert.stub(s).was.Not.called()
+
+        -- should process all elements of tm1, but none of tm2...
+        tt.ticktock(30)
+        assert.stub(s).was.called(3)
+        assert.stub(s).was.called.With(1)
+        assert.stub(s).was.called.With(2)
+        assert.stub(s).was.called.With(3)
+        s:clear()
+        tt.ticktock(20)
+        assert.stub(s).was.called(0)
+        assert.stub(t).was.Not.called()
+
+        -- should now process all elements of tm2, too.
+        tt.ticktock(100)
+        assert.stub(s).was.Not.called()
+        assert.stub(t).was.called(1)
+        assert.stub(t).was.called.With(42)
+    end)
+
+    it("tick modifiers", function()
+        local s = spy.on(keybow, "set_modifier")
+        mb.addmodifiers(0, keybow.KEY_DOWN, keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
+
+        tt.ticktock(50)
+        assert.spy(s).was.called(2)
+        assert.spy(s).was.called.With(keybow.LEFT_CTRL, keybow.KEY_DOWN)
+        assert.spy(s).was.called.With(keybow.LEFT_SHIFT, keybow.KEY_DOWN)
+    end)
+
+    it("ticks keys", function()
+        local sm = spy.on(keybow, "set_modifier")
+        local sk = spy.on(keybow, "tap_key")
+        mb.addkeys(0, "abc", keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
+
+        tt.ticktock(100)
+        -- note that the modifiers were pressed AND released by now...
+        assert.spy(sm).was.called(4)
+        assert.spy(sm).was.called.With(keybow.LEFT_CTRL, keybow.KEY_DOWN)
+        assert.spy(sm).was.called.With(keybow.LEFT_SHIFT, keybow.KEY_DOWN)
+        assert.spy(sm).was.called.With(keybow.LEFT_CTRL, keybow.KEY_UP)
+        assert.spy(sm).was.called.With(keybow.LEFT_SHIFT, keybow.KEY_UP)
+
+        assert.spy(sk).was.called(3)
+        assert.spy(sk).was.called.With("a")
+        assert.spy(sk).was.called.With("b")
+        assert.spy(sk).was.called.With("c")
+    end)
+
+end)
