@@ -61,18 +61,30 @@ function mb.tap_times(key, times, ...)
 
 -- Tick mappers execute a series of tick'ered function calls, passing in each
 -- one of a sequence of things with each tick until done. So, this is like
--- array mappers, but this time they're broken into discrete ticks.
+-- array mappers, but this time they're broken into discrete ticks. And since
+-- we sometimes need to do multiple ticked steps per element, our tick mappers
+-- can also work on sequences of functions to be called for each element.
 local TickMapper = {}
 TickMapper.__index = TickMapper
 mb.TickMapper = TickMapper
 
--- Creates a new tick mapper that calls a function on every element of an
--- array, but only one call per tick.
+-- Creates a new tick mapper that calls a function (or a sequence of
+-- functions) on every element of an array, but only one call per tick.
 --
 -- luacheck: ignore 212/self
 function TickMapper:new(func, ...)
+    -- Since we allow for sequences of functions, simply turn a single
+    -- function given to us into a single-element sequence. Additionally, we
+    -- need to handle the special test case where someone is giving us a
+    -- function which in fact is a table (as "busted" does with spies and
+    -- stubs).
+    if type(func) == "function" or (type(func) == "table" and #func == 0) then
+        func = {func}
+    end
     local slf = {
-        func=func, -- the function to call for each element.
+        func=func, -- the function(s) to call for each element.
+        fidx=1,
+        flen=#func,
         elements={...}, -- the elements to map onto function calls.
         idx=1,
         len=#{...}
@@ -80,18 +92,27 @@ function TickMapper:new(func, ...)
     return setmetatable(slf, TickMapper)
 end
 
--- For each tick, process only the next element in our list until all elements
--- have been processed. Then indicate finish.
+-- For each tick, process only the next element and next function in our list
+-- until all functions for this element, and then all elements have been
+-- processed. Only then indicate finish.
 function TickMapper:process()
     -- Don't wonder why we shield this, but this way we also correctly handle
     -- the border case of an empty list of elements to map without crashing.
     if self.idx <= self.len then
-        self.func(self.elements[self.idx])
+        self.func[self.fidx](self.elements[self.idx])
     end
-    -- Update index to next element and indicate back whether we'll need a
-    -- further round in the future.
-    self.idx = self.idx + 1
-    return self.idx <= self.len
+    -- Update function index to next function in sequence, and only when we
+    -- have run all functions, then proceed with the next element.
+    self.fidx = self.fidx + 1
+    if self.fidx > self.flen then
+        self.fidx = 1
+        -- Update index to next element and indicate back whether we'll need a
+        -- further round in the future.
+        self.idx = self.idx + 1
+        return self.idx <= self.len
+    end
+    -- There's always more to do, since there are more functions waiting to be called.
+    return true
 end
 
 -- Adds a set of modifiers to be either pressed or released to the queue of
@@ -126,10 +147,15 @@ function mb.addkeys(after, keys, ...)
         end
         keys = keysarr
     end
-    -- Queue the keys to tap in a sequence of ticks.
+    -- Queue the keys to tap in a sequence of ticks. Please note that we
+    -- expect things to be already broken up at this point, as the tick mapper
+    -- will dutyfully tap each element on each tick.
     mb.addkeyticker(
         TickMapper:new(
-            function(key) keybow.tap_key(key) end,
+            {
+                function(key) keybow.set_key(key, true) end,
+                function(key) keybow.set_key(key, false) end
+            },
             table.unpack(keys)
         ),
         after)
