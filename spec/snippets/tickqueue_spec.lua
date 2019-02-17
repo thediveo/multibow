@@ -21,7 +21,6 @@ SOFTWARE.
 ]]--
 
 require "mocked-keybow"
-local mb = require("snippets/multibow")
 local tq = require("snippets/mb/tickqueue")
 
 local now = 0
@@ -46,6 +45,7 @@ function El:new(stub, times)
     }, El)
 end
 
+-- luacheck: ignore 212/t
 function El:process(t)
     if self.stub then self.stub() end
     self.times = self.times - 1

@@ -74,9 +74,9 @@ describe("asynchronous keys", function()
 
     it("map a function on a ticking element sequence", function()
         local s = stub.new()
-        local tm1 = mb.send_mapped(20, s, 1, 2, 3)
+        mb.send_mapped(20, s, 1, 2, 3)
         local t = stub.new()
-        local tm2 = mb.send_mapped(100, t, 42)
+        mb.send_mapped(100, t, 42)
 
         -- "empty tick", as the tick mapper is yet delayed...
         tt.ticktock(10)
@@ -102,7 +102,7 @@ describe("asynchronous keys", function()
 
     it("map two functions on ticking sequence", function()
         local s = stub.new()
-        local tm = mb.send_mapped(0, {s, s}, 1, 2, 3)
+        mb.send_mapped(0, {s, s}, 1, 2, 3)
         tt.ticktock(100)
         assert.stub(s).was.called(2*3)
     end)
