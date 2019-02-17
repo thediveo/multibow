@@ -29,17 +29,18 @@ SOFTWARE.
 -- have gone off by now, then call their timer user functions. Keybow's tick
 -- ms counter has its epoch set when the Keybow Lua scripting started (so it's
 -- not a *nix timestamp or such). In addition to timers, we also handle queued
--- ticking objects here: these are always processed in sequence, and each such
--- ticking object may consume multiple ticks until it has finished its job.
-function tick(t)
-    mb.now = t
+-- ticking keys jobs here: these are always processed in sequence, and each
+-- such ticking key job may consume multiple ticks until it has finished its
+-- job.
+function tick(now)
+    mb.now = now
     while true do
         local next, tim = mb.timers:peek()
-        if next == nil or t < next then
+        if next == nil or now < next then
             break
         end
         mb.timers:remove()
-        tim:trigger()
+        tim:trigger(now)
     end
-    mb.tickkey(t)
+    mb.keys:process(now)
 end

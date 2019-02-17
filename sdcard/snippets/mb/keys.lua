@@ -25,6 +25,13 @@ SOFTWARE.
 
 -- luacheck: globals mb
 
+-- Our key ticker queue: its elements are keys and modifiers to press and
+-- release, one after another, so that USB HID operations won't ever take too
+-- long as to minimize tick jitter.
+mb.keys = mb.tq:new()
+
+
+
 -- Default delay between rapidly (repeated) key presses, can be overridden.
 mb.KEY_DELAY_MS = mb.KEY_DELAY_MS or 100
 
@@ -59,20 +66,21 @@ function mb.tap_times(key, times, ...)
       end
   end
 
+
 -- Tick mappers execute a series of tick'ered function calls, passing in each
 -- one of a sequence of things with each tick until done. So, this is like
 -- array mappers, but this time they're broken into discrete ticks. And since
 -- we sometimes need to do multiple ticked steps per element, our tick mappers
 -- can also work on sequences of functions to be called for each element.
-local TickMapper = {}
-TickMapper.__index = TickMapper
-mb.TickMapper = TickMapper
+local KeyJobMapper = {}
+KeyJobMapper.__index = KeyJobMapper
+mb.KeyJobMapper = KeyJobMapper
 
 -- Creates a new tick mapper that calls a function (or a sequence of
 -- functions) on every element of an array, but only one call per tick.
 --
 -- luacheck: ignore 212/self
-function TickMapper:new(func, ...)
+function KeyJobMapper:new(func, ...)
     -- Since we allow for sequences of functions, simply turn a single
     -- function given to us into a single-element sequence. Additionally, we
     -- need to handle the special test case where someone is giving us a
@@ -89,13 +97,13 @@ function TickMapper:new(func, ...)
         idx=1,
         len=#{...}
     }
-    return setmetatable(slf, TickMapper)
+    return setmetatable(slf, KeyJobMapper)
 end
 
 -- For each tick, process only the next element and next function in our list
 -- until all functions for this element, and then all elements have been
 -- processed. Only then indicate finish.
-function TickMapper:process()
+function KeyJobMapper:process()
     -- Don't wonder why we shield this, but this way we also correctly handle
     -- the border case of an empty list of elements to map without crashing.
     if self.idx <= self.len then
@@ -115,27 +123,35 @@ function TickMapper:process()
     return true
 end
 
+-- Convenience function mainly for TDD: adds a set of functions to be called
+-- one after another in a ticked fashion; this allows testing KeyJobMapper
+-- objects.
+function mb.send_mapped(afterms, func, ...)
+    mb.keys:add(
+        KeyJobMapper:new(func, ...),
+        afterms)
+end
+
 -- Adds a set of modifiers to be either pressed or released to the queue of
 -- tick'ed key operations, so in each tick only one modifier will be pressed
 -- or released. The state parameter should be either keybow.KEY_DOWN or
 -- keybow.KEY_UP. The final variable args is/are the modifier(s) to be pressed
 -- or released.
-function mb.addmodifiers(after, state, ...)
-    mb.addkeyticker(
-        TickMapper:new(
+function mb.send_modifiers(afterms, state, ...)
+    mb.keys:add(
+        KeyJobMapper:new(
             function(mod) keybow.set_modifier(mod, state) end,
-            ...
-        ),
-        after)
+            ...),
+        afterms)
 end
 
 -- Adds a sequence of key presses to the queue of tick'ed key operations,
 -- optionally enclosed by modifier presses and releases.
-function mb.addkeys(after, keys, ...)
+function mb.send_keys(after, keys, ...)
     local modsno = #{...}
     -- First queue ticked modifier press(es) if necessary.
     if modsno > 0 then
-        mb.addmodifiers(after, keybow.KEY_DOWN, ...)
+        mb.send_modifiers(after, keybow.KEY_DOWN, ...)
         after = 0
     end
     -- For convenience, explode a single keys string parameter into its
@@ -150,62 +166,15 @@ function mb.addkeys(after, keys, ...)
     -- Queue the keys to tap in a sequence of ticks. Please note that we
     -- expect things to be already broken up at this point, as the tick mapper
     -- will dutyfully tap each element on each tick.
-    mb.addkeyticker(
-        TickMapper:new(
-            {
+    mb.keys:add(
+        KeyJobMapper:new({
                 function(key) keybow.set_key(key, true) end,
                 function(key) keybow.set_key(key, false) end
             },
-            table.unpack(keys)
-        ),
+            table.unpack(keys)),
         after)
     -- And finally queue to release the modifier keys if necessary.
     if modsno > 0 then
-        mb.addmodifiers(0, keybow.KEY_UP, ...)
-    end
-end
-
--- All key tickers are handled in a (singly linked) list, as only the first
--- key ticker can be active and getting processed. Only after the first one
--- has finished, it is removed, and the next (now new) key ticker gets
--- processed. And so on...
-local firstkey = nil
-local lastkey = nil
--- Key tickers can be initially delayed as necessary.
-local keyafter = 0
-
--- Adds another asynchronous USB HID key operation at the end of the key
--- queue, waiting to be processed piecemeal-wise tick by tick.
-function mb.addkeyticker(keyop, afterms)
-    keyop.afterms = afterms or 0
-    if lastkey then
-        lastkey.next = keyop
-    end
-    keyop.next = nil
-    lastkey = keyop
-    if not firstkey then
-        -- Queue was empty before, so we need to kick it off...
-        firstkey = keyop
-        keyafter = mb.now + keyop.afterms
-    end
-end
-
--- Key tick(ing) handler responsible to work on the current key operation as
--- well as on the asynchronous key operations queue tick by tick. Since key
--- operations are always in sequence as added, there is no point in using a
--- (min) priority queue here. Instead, we roll our own very basic and
--- low-profile single-linked list.
-function mb.tickkey(t)
-    -- something in the queue (still) to be processed?
-    if firstkey and t >= keyafter then
-        if not firstkey:process() then
-            -- as the current key operation has finished, so prepare the next
-            -- key operation for the next round, optionally delaying it the
-            -- span requested.
-            firstkey = firstkey.next
-            if firstkey then
-                keyafter = mb.now + firstkey.afterms
-            end
-        end
+        mb.send_modifiers(0, keybow.KEY_UP, ...)
     end
 end

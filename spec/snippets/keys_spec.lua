@@ -74,12 +74,9 @@ describe("asynchronous keys", function()
 
     it("map a function on a ticking element sequence", function()
         local s = stub.new()
-        local tm1 = mb.TickMapper:new(s, 1, 2, 3)
+        local tm1 = mb.send_mapped(20, s, 1, 2, 3)
         local t = stub.new()
-        local tm2 = mb.TickMapper:new(t, 42)
-
-        mb.addkeyticker(tm1, 20)
-        mb.addkeyticker(tm2, 100)
+        local tm2 = mb.send_mapped(100, t, 42)
 
         -- "empty tick", as the tick mapper is yet delayed...
         tt.ticktock(10)
@@ -105,15 +102,14 @@ describe("asynchronous keys", function()
 
     it("map two functions on ticking sequence", function()
         local s = stub.new()
-        local tm = mb.TickMapper:new({s, s}, 1, 2, 3)
-        mb.addkeyticker(tm)
+        local tm = mb.send_mapped(0, {s, s}, 1, 2, 3)
         tt.ticktock(100)
         assert.stub(s).was.called(2*3)
     end)
 
     it("tick modifiers", function()
         local s = spy.on(keybow, "set_modifier")
-        mb.addmodifiers(0, keybow.KEY_DOWN, keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
+        mb.send_modifiers(0, keybow.KEY_DOWN, keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
 
         tt.ticktock(50)
         assert.spy(s).was.called(2)
@@ -124,7 +120,7 @@ describe("asynchronous keys", function()
     it("ticks keys in a string", function()
         local sm = spy.on(keybow, "set_modifier")
         local sk = spy.on(keybow, "set_key")
-        mb.addkeys(0, "abc", keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
+        mb.send_keys(0, "abc", keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
 
         tt.ticktock(100)
         -- note that the modifiers were pressed AND released by now...
@@ -146,7 +142,7 @@ describe("asynchronous keys", function()
 
     it("ticks keys in a table", function()
         local sk = spy.on(keybow, "set_key")
-        mb.addkeys(0, {"a", keybow.ENTER, "c"})
+        mb.send_keys(0, {"a", keybow.ENTER, "c"})
 
         tt.ticktock(100)
 

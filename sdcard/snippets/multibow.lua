@@ -32,6 +32,7 @@ require "keybow"
 mb.path = (...):match("^(.-)[^%/]+$")
 
 mb.pq = require(mb.path .. "mb/prioqueue")
+mb.tq = require(mb.path .. "mb/tickqueue")
 require(mb.path .. "mb/ticker")
 require(mb.path .. "mb/timer")
 require(mb.path .. "mb/morekeys")

@@ -24,17 +24,16 @@ SOFTWARE.
 ]]--
 
 local pq = {}
-
 pq.__index = pq
 
 -- Creates a new priority queue.
+--
 -- luacheck: ignore 212/self
 function pq:new()
-    local slf = {}
-    setmetatable(slf, pq)
-    slf.heap = {}
-    slf.size = 0
-    return slf
+    return setmetatable({
+        heap={},
+        size=0
+    }, pq)
 end
 
 -- Returns the foremost (minimum) element (priority, value) from the priority
@@ -130,4 +129,4 @@ function pq:delete(priority, value)
     return priority, v
 end
 
-return pq
+return pq -- module
