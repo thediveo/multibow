@@ -38,10 +38,10 @@ rock() {
 # Downloads the fine hererocks Lua/luarocks installation script if not already
 # done so, then ensures to install Lua 5.3 and latest luarocks.
 mkdir -p $VENV
-if [ ! -f $VENV/hererocks.py ]; then
+if [ ! -s $VENV/hererocks.py ]; then
     wget https://raw.githubusercontent.com/mpeterv/hererocks/latest/hererocks.py -O $HEREROCKS
 fi
-if [ ! -f $VENV/bin/activate ]; then
+if [ ! -s $VENV/bin/activate ]; then
     python3 $HEREROCKS $VENV -l5.3 -rlatest
 fi
 

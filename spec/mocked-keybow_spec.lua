@@ -38,13 +38,26 @@ describe("Mocked Keybow API", function()
     end
 
     it("delays ms or not", function()
-        assert.is_true(sleep(10, 1000, keybow.sleep, true) >= 10)
-        assert.is_true(sleep(10, 1000, keybow.sleep, false) < 10)
+        assert.is.True(sleep(10, 1000, keybow.sleep, true) >= 10)
+        assert.is.True(sleep(10, 1000, keybow.sleep, false) < 10)
     end)
 
     it("delays us or not", function()
-        assert.is_true(sleep(10, 1000*1000, keybow.usleep, true) >= 10)
-        assert.is_true(sleep(10, 1000*1000, keybow.usleep, false) < 10)
+        -- work around certain VM+system combinations being too unreliable for
+        -- measuring in the us range, so we try several times and only fail in
+        -- case the test fails for every attempt.
+        local rounds = 20
+        local fails = 0
+        for _ = 1, rounds, 1 do
+            if not (sleep(10, 1000*1000, keybow.usleep, true) >= 10) then
+                fails = fails + 1
+            elseif not (sleep(10, 1000*1000, keybow.usleep, false) < 10) then
+                fails = fails + 1
+            end
+            -- assert.is.True(sleep(10, 1000*1000, keybow.usleep, true) >= 10)
+            -- assert.is.True(sleep(10, 1000*1000, keybow.usleep, false) < 10)
+        end
+        assert.is.True(fails < rounds)
     end)
 
 end)
