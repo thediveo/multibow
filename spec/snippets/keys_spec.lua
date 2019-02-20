@@ -72,6 +72,10 @@ describe("asynchronous keys", function()
 
     local tt = require("spec/snippets/ticktock")
 
+    before_each(function()
+        mb.keys:clear()
+    end)
+
     it("map a function on a ticking element sequence", function()
         local s = stub.new()
         mb.send_mapped(20, s, 1, 2, 3)
@@ -107,6 +111,33 @@ describe("asynchronous keys", function()
         assert.stub(s).was.called(2*3)
     end)
 
+    it("tick repeatedly", function()
+        local s = stub.new()
+        local kj = mb.KeyJobMapper:new(s, 42)
+        mb.keys:add(mb.KeyJobRepeater:new(kj, 2, 20))
+
+        tt.ticktock(10)
+        assert.stub(s).was.called(1)
+
+        s:clear()
+        tt.ticktock(10)
+        assert.stub(s).was.Not.called()
+
+        s:clear()
+        tt.ticktock(10)
+        assert.stub(s).was.called(1)
+    end)
+
+    it("#focus tick repeatedly**2", function()
+        local s = stub.new()
+        local kj = mb.KeyJobMapper:new(s, 42)
+        local rkj = mb.KeyJobRepeater:new(kj, 2)
+        mb.keys:add(mb.KeyJobRepeater:new(rkj, 2))
+
+        tt.ticktock(50)
+        assert.stub(s).was.called(4)
+    end)
+
     it("tick modifiers", function()
         local s = spy.on(keybow, "set_modifier")
         mb.send_modifiers(0, keybow.KEY_DOWN, keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
@@ -117,7 +148,7 @@ describe("asynchronous keys", function()
         assert.spy(s).was.called.With(keybow.LEFT_SHIFT, keybow.KEY_DOWN)
     end)
 
-    it("ticks keys in a string", function()
+    it("tick keys in a string", function()
         local sm = spy.on(keybow, "set_modifier")
         local sk = spy.on(keybow, "set_key")
         mb.send_keys(0, "abc", keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
@@ -140,7 +171,7 @@ describe("asynchronous keys", function()
         assert.spy(sk).was.called.With("c", false)
     end)
 
-    it("ticks keys in a table", function()
+    it("tick keys in a table", function()
         local sk = spy.on(keybow, "set_key")
         mb.send_keys(0, {"a", keybow.ENTER, "c"})
 

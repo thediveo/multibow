@@ -30,15 +30,18 @@ tq.__index = tq
 -- processed when ticking along. Only after the first element has finished its
 -- processing it gets removed and the next element moves into first position,
 -- getting processed next.
---
--- luacheck: ignore 212/self
-function tq:new()
-    return setmetatable({
-        head=nil,
-        tail=nil,
-        at=nil,
-        now=0
-    }, tq)
+function tq:new() -- luacheck: ignore 212/self
+    local slf = setmetatable({}, tq)
+    slf:clear()
+    return slf
+end
+
+-- Convenience for TDD
+function tq:clear()
+    self.head = nil
+    self.tail = nil
+    self.at = nil
+    self.now = 0
 end
 
 -- Adds another element to this ticking queue, waiting to be processed when
@@ -63,21 +66,32 @@ end
 
 -- Processes the head element of this ticking queue for another tick. If the
 -- head element then signals that it has finished, then the next element in
--- queue will be processed in the next turn.
+-- queue will be processed in the next turn. Finishing is indicated by return
+-- -1 from a the process() method of the head queue element. 0 means: please
+-- call me again the next time (erm, tick). And a positive value indicates to
+-- call again, but this time after the amount of ms as indicated by the return
+-- value.
 function tq:process(now)
     self.now = now
     if self.head == nil then return end
-    -- Did we already passed the time where the head element in this
-    -- queue is supposed to become active?
+    -- Did we already pass the time where the head element in this queue is
+    -- supposed to become active or to be processed further? If not, we don't
+    -- do anything yet.
     if now < self.at then return end
-    if self.head:process(now) then return end
-    -- The foremost element finished its processing, so let's move on to the
-    -- next element in our list ... if there is any. It will start its
-    -- processing with the next tick; we're just setting up things here for
-    -- this next round.
-    self.head = self.head.next
-    if self.head then
-        self.at = self.now + self.head.afterms
+    local afterms = self.head:process(now)
+    if afterms > 0 then
+        -- More to process, but only after a certain amount of time, as
+        -- indicated by the return value of the process() method.
+        self.at = now + afterms
+    elseif afterms < 0 then
+        -- The foremost element finally finished its processing, so let's move on
+        -- to the next element in our list ... if there is any. It will start its
+        -- processing with the next tick; we're just setting up things here for
+        -- this next round.
+        self.head = self.head.next
+        if self.head then
+            self.at = self.now + self.head.afterms
+        end
     end
 end
 

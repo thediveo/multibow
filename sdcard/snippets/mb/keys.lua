@@ -67,6 +67,7 @@ function mb.tap_times(key, times, ...)
   end
 
 
+
 -- Tick mappers execute a series of tick'ered function calls, passing in each
 -- one of a sequence of things with each tick until done. So, this is like
 -- array mappers, but this time they're broken into discrete ticks. And since
@@ -78,31 +79,37 @@ mb.KeyJobMapper = KeyJobMapper
 
 -- Creates a new tick mapper that calls a function (or a sequence of
 -- functions) on every element of an array, but only one call per tick.
---
--- luacheck: ignore 212/self
-function KeyJobMapper:new(func, ...)
+function KeyJobMapper:new(func, ...) -- luacheck: ignore 212/self
     -- Since we allow for sequences of functions, simply turn a single
     -- function given to us into a single-element sequence. Additionally, we
     -- need to handle the special test case where someone is giving us a
     -- function which in fact is a table (as "busted" does with spies and
-    -- stubs).
+    -- stubs). Bottom line: we need much more space to explain than to do our
+    -- thing. Sigh.
     if type(func) == "function" or (type(func) == "table" and #func == 0) then
         func = {func}
     end
-    local slf = {
+    local slf = setmetatable({
         func=func, -- the function(s) to call for each element.
-        fidx=1,
         flen=#func,
         elements={...}, -- the elements to map onto function calls.
-        idx=1,
         len=#{...}
-    }
-    return setmetatable(slf, KeyJobMapper)
+    }, KeyJobMapper)
+    slf:reset()
+    return slf
+end
+
+-- Reset a tick mapper so it can be repeated (using a key repeater job).
+function KeyJobMapper:reset()
+    self.fidx = 1
+    self.idx = 1
 end
 
 -- For each tick, process only the next element and next function in our list
 -- until all functions for this element, and then all elements have been
--- processed. Only then indicate finish.
+-- processed. Only then declare finish by returning -1 as the "done"
+-- indication. Related, return 0 if there is still work to be done on the next
+-- round, or a positive "afterms" value indicating to call back only later.
 function KeyJobMapper:process()
     -- Don't wonder why we shield this, but this way we also correctly handle
     -- the border case of an empty list of elements to map without crashing.
@@ -117,10 +124,49 @@ function KeyJobMapper:process()
         -- Update index to next element and indicate back whether we'll need a
         -- further round in the future.
         self.idx = self.idx + 1
-        return self.idx <= self.len
+        return self.idx <= self.len and 0 or -1
     end
-    -- There's always more to do, since there are more functions waiting to be called.
-    return true
+    -- There's always more to do, since there are more functions waiting to be
+    -- called; and we want to process the next function with the next tick.
+    return 0
+end
+
+-- Repeaters allow repeating tick mappers, but also repeaters; that is, we can
+-- repeat repeaters.
+local KeyJobRepeater = {}
+KeyJobRepeater.__index = KeyJobRepeater
+mb.KeyJobRepeater = KeyJobRepeater
+
+-- Creates a new tick repeater that allows to repeat both tick mappers, as
+-- well as repeaters.
+function KeyJobRepeater:new(keyjob, times, pause) -- luacheck: ignore 212/self
+    pause = pause or 0
+    local slf = setmetatable({
+        keyjob=keyjob,
+        times=times,
+        pause=pause
+    }, KeyJobRepeater)
+    slf:reset()
+    return slf
+end
+
+-- Rest a repeater, so repeaters can repeat repeaters. (ARGH!!!)
+function KeyJobRepeater:reset()
+    self.round = 1
+end
+
+function KeyJobRepeater:process()
+    local afterms = self.keyjob:process()
+    if afterms >= 0 then return afterms end
+    -- Start the next round ... or are we done now? Please note that the next
+    -- round might be delayed if so required in order to give the applications
+    -- on the USB host system some time to process the burst of key events.
+    -- Well, that's not meant with respect to USB and USB host, but instead
+    -- the applications working on key input.
+    self.round = self.round + 1
+    -- Always reset, so repeater cascades work ... greetings to M.C.E.
+    self.keyjob:reset()
+    return self.round <= self.times and self.pause or -1
 end
 
 -- Convenience function mainly for TDD: adds a set of functions to be called
@@ -147,7 +193,7 @@ end
 
 -- Adds a sequence of key presses to the queue of tick'ed key operations,
 -- optionally enclosed by modifier presses and releases.
-function mb.send_keys(after, keys, ...)
+function mb.send_keys_repeatedly(after, times, pause, keys, ...)
     local modsno = #{...}
     -- First queue ticked modifier press(es) if necessary.
     if modsno > 0 then
@@ -177,4 +223,8 @@ function mb.send_keys(after, keys, ...)
     if modsno > 0 then
         mb.send_modifiers(0, keybow.KEY_UP, ...)
     end
+end
+
+function mb.send_keys(after, keys, ...)
+    mb.send_keys_repeatedly(after, 1, 0, keys, ...)
 end

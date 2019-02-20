@@ -27,9 +27,7 @@ local pq = {}
 pq.__index = pq
 
 -- Creates a new priority queue.
---
--- luacheck: ignore 212/self
-function pq:new()
+function pq:new() -- luacheck: ignore 212/self
     return setmetatable({
         heap={},
         size=0

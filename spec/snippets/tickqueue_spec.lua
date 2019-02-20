@@ -36,12 +36,13 @@ end
 local El = {}
 El.__index = El
 
--- luacheck: ignore 212/self
-function El:new(stub, times)
+function El:new(stub, times, delay) -- luacheck: ignore 212/self
     times = times or 0
+    delay = delay or 0
     return setmetatable({
         stub=stub,
-        times=times
+        times=times,
+        delay=delay
     }, El)
 end
 
@@ -49,7 +50,7 @@ end
 function El:process(t)
     if self.stub then self.stub() end
     self.times = self.times - 1
-    return self.times > 0
+    return self.times > 0 and self.delay or -1
 end
 
 describe("ticking queue", function()
@@ -64,6 +65,26 @@ describe("ticking queue", function()
 
         process(q, 50)
         assert.stub(s).was.called(2)
+    end)
+
+    it("processes a single entry with intermediate delays", function()
+        local q = tq:new()
+        local s = stub.new()
+        q:add(El:new(s, 2, 20), 0)
+
+        process(q, 10)
+        assert.stub(s).was.called()
+        assert.is.Not.Nil(q.head) -- element still in queue
+
+        s:clear()
+        process(q, 10)
+        assert.stub(s).was.Not.called()
+        assert.is.Not.Nil(q.head) -- element still in queue
+
+        s:clear()
+        process(q, 20)
+        assert.stub(s).was.called()
+        assert.is.Nil(q.head) -- element now gone for good...
     end)
 
     it("processes multiple entries with intermediate delay", function()
