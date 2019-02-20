@@ -128,7 +128,7 @@ describe("asynchronous keys", function()
         assert.stub(s).was.called(1)
     end)
 
-    it("#focus tick repeatedly**2", function()
+    it("tick repeatedly**2", function()
         local s = stub.new()
         local kj = mb.KeyJobMapper:new(s, 42)
         local rkj = mb.KeyJobRepeater:new(kj, 2)
