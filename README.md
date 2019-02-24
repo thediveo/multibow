@@ -75,11 +75,11 @@ We start with the probably indispensable media player controls keyboard layout.
 ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
 ┊ 10 ┊  ┊  7 ┊  ┊  4 ┊  ┊  1 ┊
 └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
-                  ⏹️️
+space             ⏹️️
 ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐  ┌╌╌╌╌┐
 ┊  9 ┊  ┊  6 ┊  ┊  3 ┊  ┊  0 ┊
 └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘  └╌╌╌╌┘
-          ◀️◀️      ▮▶      ▶▶
+ESC       ◀️◀️      ▮▶      ▶▶
 ```
 
 ### Debug Go in VisualStudio Code
@@ -112,9 +112,38 @@ Debug Go programs and packages in VisualStudio Code with its Go extension.
 - DEBUG opens/shows debug panel.
 - CLOSE PANEL ... closes the output/debug panel.
 
-### Kdenlive Video Editor
+### Numpad
 
-_coming soon..._
+Regular layout
+```text
+┌╌╌╌╌┐  ╔════╗  ╔════╗  ╔════╗
+┊ 11 ┊  ║  8 ║  ║  5 ║  ║  2 ║
+└╌╌╌╌┘  ╚════╝  ╚════╝  ╚════╝
+           9       8       7
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║ 10 ║  ║  7 ║  ║  4 ║  ║  1 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+   0       6       5       4
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║  9 ║  ║  6 ║  ║  3 ║  ║  0 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+ enter     3       2       1
+```
+Shirt layout
+```text
+┌╌╌╌╌┐  ╔════╗  ╔════╗  ╔════╗
+┊ 11 ┊  ║  8 ║  ║  5 ║  ║  2 ║
+└╌╌╌╌┘  ╚════╝  ╚════╝  ╚════╝
+           +       -       =
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║ 10 ║  ║  7 ║  ║  4 ║  ║  1 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+   .       /       %       $
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║  9 ║  ║  6 ║  ║  3 ║  ║  0 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+   ,   backspace delete   ESC
+```
 
 ### SHIFT Overlay
 
