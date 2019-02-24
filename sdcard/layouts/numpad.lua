@@ -1,4 +1,4 @@
-local km = _G.km or {}
+local mp = _G.mp or {}
 local mb = require("snippets/multibow")
 
 --[[
@@ -18,65 +18,65 @@ cable going off "northwards":
 
 ]]--
 -- Instead of using 0 to 11, i renamed them to row/colums
-km.A1 = km.A1 or 11
-km.A2 = km.A2 or 10
-km.A3 = km.A3 or 9
+mp.A1 = mp.A1 or 11
+mp.A2 = mp.A2 or 10
+mp.A3 = mp.A3 or 9
 
-km.B1 = km.B1 or 8
-km.B2 = km.B2 or 7
-km.B3 = km.B3 or 6
+mp.B1 = mp.B1 or 8
+mp.B2 = mp.B2 or 7
+mp.B3 = mp.B3 or 6
 
-km.C1 = km.C1 or 5
-km.C2 = km.C2 or 4
-km.C3 = km.C3 or 3
+mp.C1 = mp.C1 or 5
+mp.C2 = mp.C2 or 4
+mp.C3 = mp.C3 or 3
 
-km.D1 = km.D1 or 2
-km.D2 = km.D2 or 1
-km.D3 = km.D3 or 0
+mp.D1 = mp.D1 or 2
+mp.D2 = mp.D2 or 1
+mp.D3 = mp.D3 or 0
 
 -- Setup shift key
-function km.unshift(_)
-    mb.activate_keymap(km.keymap.name)
+function mp.unshift(_)
+    mb.activate_keymap(mp.keymap.name)
 end
 
 -- The keymap layout...
-km.keymap = {
-    name="numpad",
+mp.keymap = {
+    name="mp",
     -- A1 is the shift key, so we skip that
-    [km.A2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("0") end},
-    [km.A3] = { c={r=0, g=0, b=1}, press=function() mb.tap(keybow.ENTER) end},
-    [km.B1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("9") end},
-    [km.B2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("6") end},
-    [km.B3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("3") end},
-    [km.C1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("8") end},
-    [km.C2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("5") end},
-    [km.C3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("2") end},
-    [km.D1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("7") end},
-    [km.D2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("4") end},
-    [km.D3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("1") end},
+    [mp.A2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("0") end},
+    [mp.A3] = { c={r=0, g=0, b=1}, press=function() mb.tap(keybow.ENTER) end},
+    [mp.B1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("9") end},
+    [mp.B2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("6") end},
+    [mp.B3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("3") end},
+    [mp.C1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("8") end},
+    [mp.C2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("5") end},
+    [mp.C3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("2") end},
+    [mp.D1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("7") end},
+    [mp.D2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("4") end},
+    [mp.D3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("1") end},
 }
 
-km.keymap_shifted = {
-    name="numpad-shifted",
+mp.keymap_shifted = {
+    name="mp-shifted",
     secondary=true,
 
-    [km.A2] = { c={r=0, g=1, b=0}, press=function() mb.tap(".") end},
-    [km.A3] = { c={r=0, g=1, b=0}, press=function() mb.tap(",") end},
-    [km.B1] = { c={r=0, g=1, b=1}, press=function() mb.tap("+") end},
-    [km.C1] = { c={r=0, g=1, b=1}, press=function() mb.tap("-") end},
-    [km.D1] = { c={r=0, g=1, b=1}, press=function() mb.tap("=") end},
-    [km.B2] = { c={r=0, g=1, b=1}, press=function() mb.tap("/") end},
-    [km.C2] = { c={r=0, g=1, b=1}, press=function() mb.tap("%") end},
-    [km.D2] = { c={r=1, g=1, b=0}, press=function() mb.tap("$") end},
-    [km.B3] = { c={r=1, g=0, b=0}, press=function() mb.tap(keybow.BACKSPACE) end},
-    [km.C3] = { c={r=1, g=0, b=0}, press=function() mb.tap(keybow.DELETE) end},
-    --[km.D3] = { c={r=0.5, g=0.5, b=1}, press=function() mb.tap(keybow.ESC) end},
+    [mp.A2] = { c={r=0, g=1, b=0}, press=function() mb.tap(".") end},
+    [mp.A3] = { c={r=0, g=1, b=0}, press=function() mb.tap(",") end},
+    [mp.B1] = { c={r=0, g=1, b=1}, press=function() mb.tap("+") end},
+    [mp.C1] = { c={r=0, g=1, b=1}, press=function() mb.tap("-") end},
+    [mp.D1] = { c={r=0, g=1, b=1}, press=function() mb.tap("=") end},
+    [mp.B2] = { c={r=0, g=1, b=1}, press=function() mb.tap("/") end},
+    [mp.C2] = { c={r=0, g=1, b=1}, press=function() mb.tap("%") end},
+    [mp.D2] = { c={r=1, g=1, b=0}, press=function() mb.tap("$") end},
+    [mp.B3] = { c={r=1, g=0, b=0}, press=function() mb.tap(keybow.BACKSPACE) end},
+    [mp.C3] = { c={r=1, g=0, b=0}, press=function() mb.tap(keybow.DELETE) end},
+    --[mp.D3] = { c={r=0.5, g=0.5, b=1}, press=function() mb.tap(keybow.ESC) end},
 
-    [-1] = {release=km.unshift},
+    [-1] = {release=mp.unshift},
 }
-km.keymap.shift_to = km.keymap_shifted
-km.keymap_shifted.shift_to = km.keymap
+mp.keymap.shift_to = mp.keymap_shifted
+mp.keymap_shifted.shift_to = mp.keymap
 
-mb.register_keymap(km.keymap)
-mb.register_keymap(km.keymap_shifted)
-
+mb.register_keymap(mp.keymap)
+mb.register_keymap(mp.keymap_shifted)
+return mp
