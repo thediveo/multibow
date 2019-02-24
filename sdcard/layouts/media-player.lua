@@ -66,6 +66,11 @@ mplay.keymap = {
     [mplay.KEY_MUTE] = { c={r=0.5, g=0.1, b=0.1}, press=function() mb.tap(keybow.MEDIA_MUTE) end},
     [mplay.KEY_VOLDN] = { c={r=0.5, g=0.5, b=0.5}, press=function() mb.tap(keybow.MEDIA_VOLUMEDOWN) end},
     [mplay.KEY_VOLUP] = { c={r=1, g=1, b=1}, press=function() mb.tap(keybow.MEDIA_VOLUMEUP) end},
+
+    [10] =  { c={r=0, g=1, b=0}, press=function() mb.tap(keybow.ESC) end}, --exit fullscreen on most players
+    [9] =  { c={r=0, g=1, b=0}, press=function() mb.tap(keybow.SPACE) end}, --pause on web eg. plex
+
+
 }
 mb.register_keymap(mplay.keymap)
 
