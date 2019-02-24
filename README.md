@@ -145,6 +145,38 @@ Shirt layout
    ,   backspace delete   ESC
 ```
 
+### Tmux
+
+Regular layout
+```text
+┌╌╌╌╌┐  ╔════╗  ╔════╗  ╔════╗
+┊ 11 ┊  ║  8 ║  ║  5 ║  ║  2 ║
+└╌╌╌╌┘  ╚════╝  ╚════╝  ╚════╝
+        split v  move l move r
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║ 10 ║  ║  7 ║  ║  4 ║  ║  1 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+split h new window      move u
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║  9 ║  ║  6 ║  ║  3 ║  ║  0 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+exit    cycle p cycle n move d
+```
+Shirt layout (...coming soon)
+```text
+┌╌╌╌╌┐  ╔════╗  ╔════╗  ╔════╗
+┊ 11 ┊  ║  8 ║  ║  5 ║  ║  2 ║
+└╌╌╌╌┘  ╚════╝  ╚════╝  ╚════╝
+
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║ 10 ║  ║  7 ║  ║  4 ║  ║  1 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+
+╔════╗  ╔════╗  ╔════╗  ╔════╗
+║  9 ║  ║  6 ║  ║  3 ║  ║  0 ║
+╚════╝  ╚════╝  ╚════╝  ╚════╝
+```
+
 ### SHIFT Overlay
 
 This layout provides a SHIFT key. Only when pressed and held, two additional
