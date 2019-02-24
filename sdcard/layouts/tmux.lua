@@ -1,4 +1,4 @@
-local tm = {}
+local tm = _G.tm or {}
 local mb = require("snippets/multibow")
 --[[
 The Keybow layout is as follows when in landscape orientation, with the USB
@@ -33,11 +33,33 @@ tm.D1 = tm.D1 or 2
 tm.D2 = tm.D2 or 1
 tm.D3 = tm.D3 or 0
 
+function tm.command(cmd)
+    mb.tap("`")
+    keybow.sleep(50)
+    mb.tap(cmd)
+end
+
+function tm.exit()
+    keybow.text("exit")
+    keybow.tap_enter()
+end
+
 tm.keymap = {
     name="tmux",
-    [8] = { c={r=0, g=1, b=1}, press=function() mb.tap("`", "b") end},
-    [10] = { c={r=0, g=1, b=1}, press=function() mb.tap("`", "v") end},
-    [7] = { c={r=0, g=1, b=1}, press=function() mb.tap("`", "c") end},
+    [tm.A2] = { c={r=0, g=1, b=1}, press=function(_) tm.command("v") end},
+    [tm.B1] = { c={r=0, g=1, b=1}, press=function(_) tm.command("b") end},
+    [tm.B2] = { c={r=0, g=1, b=1}, press=function(_) tm.command("c") end},
+
+    [tm.C1] = { c={r=1, g=1, b=0}, press=function(_) tm.command("h") end},
+    [tm.D1] = { c={r=1, g=1, b=0}, press=function(_) tm.command("l") end},
+
+    [tm.D2] = { c={r=1, g=0, b=1}, press=function(_) tm.command("k") end},
+    [tm.D3] = { c={r=1, g=0, b=1}, press=function(_) tm.command("j") end},
+
+    [tm.B3] = { c={r=0.5, g=1, b=0.5}, press=function(_) tm.command("p") end},
+    [tm.C3] = { c={r=0.5, g=1, b=0.5}, press=function(_) tm.command("n") end},
+
+    [tm.A3] = { c={r=1, g=0, b=0}, press=function(_) tm.exit() end},
 
 }
 
