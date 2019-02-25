@@ -45,15 +45,15 @@ mp.keymap = {
     -- A1 is the shift key, so we skip that
     [mp.A2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("0") end},
     [mp.A3] = { c={r=0, g=0, b=1}, press=function() mb.tap(keybow.ENTER) end},
-    [mp.B1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("9") end},
-    [mp.B2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("6") end},
-    [mp.B3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("3") end},
+    [mp.B1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("7") end},
+    [mp.B2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("4") end},
+    [mp.B3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("1") end},
     [mp.C1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("8") end},
     [mp.C2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("5") end},
     [mp.C3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("2") end},
-    [mp.D1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("7") end},
-    [mp.D2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("4") end},
-    [mp.D3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("1") end},
+    [mp.D1] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("9") end},
+    [mp.D2] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("6") end},
+    [mp.D3] = { c={r=0, g=1, b=0.5}, press=function() mb.tap("3") end},
 }
 
 mp.keymap_shifted = {
