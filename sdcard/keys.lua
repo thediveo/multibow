@@ -5,4 +5,5 @@ require "layouts/media-player" -- indispensable media player controls.
 --require "layouts/kdenlive" -- editing video using Kdenlive.
 require "layouts/numpad" -- numpad with shift layout.
 require "layouts/tmux" -- tmux layout using ` as prefix
+require "layouts/i3" -- i3 layout using super as prefix
 require "layouts/empty" -- empty, do-nothing layout.
