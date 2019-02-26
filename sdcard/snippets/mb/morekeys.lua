@@ -75,6 +75,9 @@ keybow.KPEQUAL = 0x67
 
 keybow.COMPOSE = 0x65
 keybow.POWER = 0x66
+keybow.SUPER = 0xe3
+keybow.SHIFT = 0xe1
+keybow.CTRL = 0x01
 
 keybow.OPEN = 0x74
 keybow.HELP = 0x75
