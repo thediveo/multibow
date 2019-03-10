@@ -70,6 +70,8 @@ end)
 
 describe("key chaining operations", function()
 
+    local tt = require("spec/snippets/ticktock")
+
     -- Ensure that there are no snafu'd tick jobs present at the begin of each
     -- new test, remaining from a previous (failed) test.
     before_each(function()
@@ -86,133 +88,54 @@ describe("key chaining operations", function()
         assert.are.Not.equal(kc1, kc2)
     end)
 
-    it("taps keys", function ()
+    it("taps string keys", function()
         local s = spy.on(mb._keys, "op_tap")
-        mb.keys.tap("abc")
-        assert.spy(s).was.called(1)
-    end)
-
-end)
-
---[[
-describe("#ignore asynchronous keys", function()
-
-    local tt = require("spec/snippets/ticktock")
-
-    before_each(function()
-        mb.tq:clear()
-    end)
-
-    it("#ignore map a function on a ticking element sequence", function()
-        local s = stub.new()
-        mb.send_mapped(20, s, 1, 2, 3)
-        local t = stub.new()
-        mb.send_mapped(100, t, 42)
-
-        -- "empty tick", as the tick mapper is yet delayed...
-        tt.ticktock(10)
-        assert.stub(s).was.Not.called()
-
-        -- should process all elements of tm1, but none of tm2...
-        tt.ticktock(30)
-        assert.stub(s).was.called(3)
-        assert.stub(s).was.called.With(1)
-        assert.stub(s).was.called.With(2)
-        assert.stub(s).was.called.With(3)
-        s:clear()
-        tt.ticktock(20)
-        assert.stub(s).was.called(0)
-        assert.stub(t).was.Not.called()
-
-        -- should now process all elements of tm2, too.
-        tt.ticktock(100)
-        assert.stub(s).was.Not.called()
-        assert.stub(t).was.called(1)
-        assert.stub(t).was.called.With(42)
-    end)
-
-    it("#ignore map two functions on ticking sequence", function()
-        local s = stub.new()
-        mb.send_mapped(0, {s, s}, 1, 2, 3)
-        tt.ticktock(100)
-        assert.stub(s).was.called(2*3)
-    end)
-
-    it("#ignore tick repeatedly", function()
-        local s = stub.new()
-        local kj = mb.KeyJobMapper:new(s, 42)
-        mb.keys:add(mb.KeyJobRepeater:new(kj, 2, 20))
-
-        tt.ticktock(10)
-        assert.stub(s).was.called(1)
-
-        s:clear()
-        tt.ticktock(10)
-        assert.stub(s).was.Not.called()
-
-        s:clear()
-        tt.ticktock(10)
-        assert.stub(s).was.called(1)
-    end)
-
-    it("#ignore tick repeatedly**2", function()
-        local s = stub.new()
-        local kj = mb.KeyJobMapper:new(s, 42)
-        local rkj = mb.KeyJobRepeater:new(kj, 2)
-        mb.keys:add(mb.KeyJobRepeater:new(rkj, 2))
-
-        tt.ticktock(50)
-        assert.stub(s).was.called(4)
-    end)
-
-    it("#ignore tick modifiers", function()
-        local s = spy.on(keybow, "set_modifier")
-        mb.send_modifiers(0, keybow.KEY_DOWN, keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
-
-        tt.ticktock(50)
+        local t = spy.on(keybow, "set_key")
+        mb.keys.tap("abc").tap("def")
         assert.spy(s).was.called(2)
-        assert.spy(s).was.called.With(keybow.LEFT_CTRL, keybow.KEY_DOWN)
-        assert.spy(s).was.called.With(keybow.LEFT_SHIFT, keybow.KEY_DOWN)
+        assert.spy(t).was.called(0)
+        tt.ticktock(200)
+        -- tap = press + release
+        assert.spy(t).was.called(2*(3+3))
     end)
 
-    it("#ignore tick keys in a string", function()
-        local sm = spy.on(keybow, "set_modifier")
-        local sk = spy.on(keybow, "set_key")
-        mb.send_keys(0, "abc", keybow.LEFT_CTRL, keybow.LEFT_SHIFT)
-
+    it("taps ENTER key", function()
+        local t = spy.on(keybow, "set_key")
+        mb.keys.tap(keybow.ENTER)
         tt.ticktock(100)
-        -- note that the modifiers were pressed AND released by now...
-        assert.spy(sm).was.called(4)
-        assert.spy(sm).was.called.With(keybow.LEFT_CTRL, keybow.KEY_DOWN)
-        assert.spy(sm).was.called.With(keybow.LEFT_SHIFT, keybow.KEY_DOWN)
-        assert.spy(sm).was.called.With(keybow.LEFT_CTRL, keybow.KEY_UP)
-        assert.spy(sm).was.called.With(keybow.LEFT_SHIFT, keybow.KEY_UP)
-
-        -- note that set_key needs to be called twice for each key tap.
-        assert.spy(sk).was.called(2*3)
-        assert.spy(sk).was.called.With("a", true)
-        assert.spy(sk).was.called.With("a", false)
-        assert.spy(sk).was.called.With("b", true)
-        assert.spy(sk).was.called.With("b", false)
-        assert.spy(sk).was.called.With("c", true)
-        assert.spy(sk).was.called.With("c", false)
+        assert.spy(t).was.called(2)
+        assert.spy(t).was.called.With(keybow.ENTER, keybow.KEY_DOWN)
+        assert.spy(t).was.called.With(keybow.ENTER, keybow.KEY_UP)
     end)
 
-    it("#ignore tick keys in a table", function()
-        local sk = spy.on(keybow, "set_key")
-        mb.send_keys(0, {"a", keybow.ENTER, "c"})
+    it("modifies keys", function()
+        local t = spy.on(keybow, "set_key")
+        local m = spy.on(keybow, "set_modifier")
+        mb.keys.mod(keybow.LEFT_SHIFT, keybow.LEFT_CTRL).tap("abc")
+        tt.ticktock(200)
+        assert.spy(m).was.called(4)
+        assert.spy(m).was.called.With(keybow.LEFT_SHIFT, keybow.KEY_DOWN)
+        assert.spy(m).was.called.With(keybow.LEFT_CTRL, keybow.KEY_DOWN)
+        assert.spy(m).was.called.With(keybow.LEFT_SHIFT, keybow.KEY_UP)
+        assert.spy(m).was.called.With(keybow.LEFT_CTRL, keybow.KEY_UP)
+        assert.spy(t).was.called(2*3)
+    end)
 
-        tt.ticktock(100)
+    it("repeats keys", function()
+        local s = spy.on(keybow, "set_key")
+        mb.keys.times(3).tap("a") -- .tap("d")
+        assert.spy(s).was.called(0)
+        tt.ticktock(300)
+        assert.spy(s).was.called(3*2*(1+0))
+    end)
 
-        assert.spy(sk).was.called(2*3)
-        assert.spy(sk).was.called.With("a", true)
-        assert.spy(sk).was.called.With("a", false)
-        assert.spy(sk).was.called.With(keybow.ENTER, true)
-        assert.spy(sk).was.called.With(keybow.ENTER, false)
-        assert.spy(sk).was.called.With("c", true)
-        assert.spy(sk).was.called.With("c", false)
+    it("fin ends repeating block", function()
+        local s = spy.on(keybow, "set_key")
+        mb.keys.times(2).tap("a").fin().tap("b")
+        assert.spy(s).was.called(0)
+        tt.ticktock(300)
+        assert.spy(s).was.called(2*2*1+2*1)
     end)
 
 end)
-]]--
 

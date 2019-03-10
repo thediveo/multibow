@@ -154,6 +154,7 @@ end
 
 local Keys = {
     op = nil, -- current operation to be done when we hit the table call.
+    afterms = 0, -- accumulated delay before any operation except after().
 }
 
 -- When an element (field) of the "keys" table is getting read that doesn't
@@ -164,12 +165,14 @@ function Keys.__index(self, key)
     -- Try to look up the missing field as a chain operator; only if that
     -- succeeds, then remember the chain operator for a following table call
     -- operation. Otherwise, handle the field as any ordinary field.
-    local val = rawget(mb._keys, "op_" .. key)
+    local val = rawget(Keys, "op_" .. key)
     if val then
         self.op = val
         return self -- ...always return ourselves for further chaining.
     end
-    return rawget(self, key)
+    -- It's not one of the "magic" chain operations, so we need to look up the
+    -- field in either our own object or in our Keys class.
+    return rawget(self, key) or rawget(Keys, key)
 end
 
 -- When the "keys" table is being called as a function then activate the
@@ -197,29 +200,122 @@ function Keys:new() -- luacheck: ignore 212/self
     return k
 end
 
+-- Adds another tick job to the tick queue, unless there is already at least
+-- one tick job block open: in this case, the tick job gets added to that open
+-- block instead of to the tick queue itself.
+-- * tickjob: the tick job to be added; either to the tick queue or the
+--   currently "innermost" open block.
+-- * push: if truthy, then the tick job is opening a new tick job block, and
+--   subsequent tick jobs get added to it until it gets closed by a "fin"
+--   chain operation.
+function Keys:addtickjob(tickjob, push)
+    if #self.jobs == 0 then
+        -- No open block(s), so we queue the tick job directly, with the
+        -- currently accumulated "initial" delay.
+        mb.tq:add(tickjob, self.afterms)
+    else
+        -- There's at least one tick job block open, so we need to add the
+        -- tick job to the "innermost" block.
+        tickjob.afterms = self.afterms
+        -- * FIXME: multiple tick jobs using a sequence
+        self.jobs[#self.jobs].tickjob = tickjob
+    end
+    self.afterms = 0 -- reset accumulated delay.
+    if push then
+        -- Make this tick job the new innermost block.
+        table.insert(self.jobs, tickjob)
+    end
+end
 
+-- Convenience function to add a new tick job block.
+function Keys:addtickjobblock(tickjob)
+    return self:addtickjob(tickjob, true)
+end
+
+-- The "after()" chain operation adds a delay before the next key operation.
+-- This operation is additive, that is, if you chain multiple after()s, then
+-- they will all add up. The delay gets reset at the beginning of each chain,
+-- as well as with the next operation which is not an after().
 function Keys:op_after(ms)
-    self.afterms = self.afterms + ms
+    self.afterms = (self.afterms or 0) + ms
     return self
 end
 
-
+-- The "tap()" chain operation taps a string or a single key. Since it is easy
+-- to chain tap()s, we do not need to support an array of keys here ... famous
+-- last words.
 function Keys:op_tap(keys)
+    -- For convenience, explode a keys string parameter into its individual
+    -- characters as an array, since we want to tap each character in the
+    -- string in its own tick slot, but not all at once.
+    if type(keys) == "string" then
+        local keysarr = {}
+        for idx = 1, #keys do
+            keysarr[idx] = keys:sub(idx, idx)
+        end
+        keys = keysarr
+    elseif type(keys) == "number" then
+        keys = {keys}
+    end
+    -- Queue the keys to tap in a sequence of ticks. Please note that we
+    -- expect things to be already broken up at this point, as the tick job
+    -- mapper will dutyfully tap each element on each tick.
+    self:addtickjob(mb.TickJobMapper:new(
+        {
+            function(key) keybow.set_key(key, keybow.KEY_DOWN) end,
+            function(key) keybow.set_key(key, keybow.KEY_UP) end
+        },
+        table.unpack(keys)
+    ))
     return self
 end
 
-
+-- The "mod()" chain operation encloses the following chain operations with
+-- pressing the specified modifier keys, and releasing them afterwards. The
+-- block of enclosed operations can be explicitly closed using the "fin()"
+-- operation, otherwise the end of the whole chain is taken.
 function Keys:op_mod(...)
+    self:addtickjobblock(mb.TickJobEncloser:new(
+        nil, -- preliminary
+        function(mod) keybow.set_modifier(mod, keybow.KEY_DOWN) end,
+        function(mod) keybow.set_modifier(mod, keybow.KEY_UP) end,
+        ... -- modifier(s)
+    ))
     return self
 end
 
-function Keys:op_times(t)
-    self.jobs[#self.jobs + 1] = {} -- FIXME
+-- The "times()" chain operation repeats the following chain operations as
+-- many times as specified. The block of repeated operations can be explicitly
+-- finished using the "fin()" operation, otherwise it will be the end of the
+-- whole chain. The pause between repeated operation blocks can be controlled
+-- using the "space()" and "apart()" operations.
+function Keys:op_times(times)
+    self:addtickjobblock(mb.TickJobRepeater:new(
+        nil, -- preliminary
+        times,
+        0 -- and no pause; this can later be changed using "space()"/"apart()".
+    ))
     return self
 end
 
--- Ends the most recent "block" in a chain, such as a times() and mod() block:
--- this pops the current job of the stack of "open" key jobs.
+-- The "space()" chain operation sets the pause parameter for a repeated tick
+-- job, that is, the wait time between each round of the tick job.
+function Keys:op_space(ms)
+    if #self.jobs then
+        self.jobs[#self.jobs].pause = ms
+    end
+    return self
+end
+
+-- The "apart()" chain operation is an alias for the "space()" operation.
+function Keys:op_apart(ms)
+    return self:op_space(ms)
+end
+
+-- The "fin()" operation ends the innermost "block" in a chain, such as a
+-- "times()" and "mod()" operations block: this pops the current tick job off
+-- the stack of "open" key job blocks. It keeps silent in face of surplus
+-- "fin" operations.
 function Keys:op_fin()
     if #self.jobs > 0 then
         table.remove(self.jobs, #self.jobs)

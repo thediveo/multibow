@@ -57,7 +57,9 @@ SOFTWARE.
 --    its initial state so that it can be repeated.
 --
 -- 6. Tick jobs can carry out subjobs, but that's hidden to Multibow and just
---    the internal business of such tick jobs.
+--    the internal business of such tick jobs. However, such subjobs need to
+--    be stored in a "tickjob" field of a tick job; this is necessary so the
+--    chaining operators can do their dirty work correctly.
 
 
 -- Tick job mappers execute a series of tick'ered function calls, passing the

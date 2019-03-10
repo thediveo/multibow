@@ -75,6 +75,8 @@ describe("tick jobs", function()
         tt.ticktock(10)
         assert.stub(s).was.called(1)
 
+        -- checks that the spacing (wait time between iterations) gets
+        -- correctly carried out.
         s:clear()
         tt.ticktock(10)
         assert.stub(s).was.Not.called()
