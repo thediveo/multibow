@@ -146,18 +146,32 @@ end
 --   subsequent tick jobs get added to it until it gets closed by a "fin"
 --   chain operation.
 function Keys:addtickjob(tickjob, push)
+    tickjob.afterms = self.afterms -- make sure to freeze the accumulated delay.
+    self.afterms = 0 -- reset accumulated delay for chain.
     if #self.jobs == 0 then
         -- No open block(s), so we queue the tick job directly, with the
         -- currently accumulated "initial" delay.
-        mb.tq:add(tickjob, self.afterms)
+        mb.tq:add(tickjob, tickjob.afterms)
     else
         -- There's at least one tick job block open, so we need to add the
         -- tick job to the "innermost" block.
-        tickjob.afterms = self.afterms
-        -- * FIXME: multiple tick jobs using a sequence
-        self.jobs[#self.jobs].tickjob = tickjob
+        local jobseq = self.jobs[#self.jobs].tickjob
+        if jobseq == nil then
+            -- first job, so we avoid a tick job sequence for the moment.
+            self.jobs[#self.jobs].tickjob = tickjob
+        else
+            local seq = jobseq
+            if seq.tickjobs == nil then
+                -- second job, so swap in a sequence before adding the
+                -- existing as well as the new job.
+                seq = mb.TickJobSequencer:new()
+                self.jobs[#self.jobs].tickjob = seq
+                seq:add(jobseq)
+            end
+            -- add new tick job to ("newly") existing sequence.
+            seq:add(tickjob)
+        end
     end
-    self.afterms = 0 -- reset accumulated delay.
     if push then
         -- Make this tick job the new innermost block.
         table.insert(self.jobs, tickjob)

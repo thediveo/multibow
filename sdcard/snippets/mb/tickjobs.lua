@@ -256,7 +256,10 @@ end
 
 function TickJobSequencer:reset()
     self.idx = 0 -- note an optional wait phase for the first sub job.
-    self.jobs = 0
+    self.jobs = #self.tickjobs -- keep number of subjobs
+    for _, job in ipairs(self.tickjobs) do
+        job:reset()
+    end
 end
 
 function TickJobSequencer:add(tickjob)

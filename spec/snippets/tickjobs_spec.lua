@@ -96,7 +96,7 @@ describe("tick jobs", function()
         assert.stub(s).was.called(4)
     end)
 
-    it("enclosing", function()
+    it("enclosure", function()
         local s = stub.new()
         local before = stub.new()
         local after = stub.new()
