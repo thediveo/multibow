@@ -238,6 +238,49 @@ function TickJobEncloser:process()
         self.afterfunc(self.elements[self.idx])
         self.idx = self.idx + 1
     end
-    return 0
+    return self.idx <= self.len and 0 or -1
+end
+
+-- A sequence of tick jobs.
+local TickJobSequencer = {}
+TickJobSequencer.__index = TickJobSequencer
+mb.TickJobSequencer = TickJobSequencer
+
+function TickJobSequencer:new() -- luacheck: ignore 212/self
+    local slf = setmetatable({
+        tickjobs = {}
+    }, TickJobSequencer)
+    slf:reset()
+    return slf
+end
+
+function TickJobSequencer:reset()
+    self.idx = 0 -- note an optional wait phase for the first sub job.
+    self.jobs = 0
+end
+
+function TickJobSequencer:add(tickjob)
+    tickjob.afterms = tickjob.afterms or 0
+    table.insert(self.tickjobs, tickjob)
+    self.jobs = #self.tickjobs
+end
+
+function TickJobSequencer:process()
+    if self.idx == 0 then
+        self.idx = 1
+        if self.jobs > 0 and self.tickjobs[1].afterms > 0 then
+            -- delay the first sub process according to its configuration.
+            return self.tickjobs[1].afterms
+        end
+        -- fall through to immediately process first sub job.
+    end
+    if self.idx <= self.jobs then
+        local afterms = self.tickjobs[self.idx]:process()
+        if afterms >= 0 then return afterms end
+        self.idx = self.idx + 1
+    end
+    -- Please note that each sub job in the sequence might have its own
+    -- initial afterms delay.
+    return self.idx <= self.jobs and self.tickjobs[self.idx].afterms or -1
 end
 

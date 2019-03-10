@@ -115,5 +115,29 @@ describe("tick jobs", function()
         assert.spy(after).was.called.With(4242)
         assert.spy(after).was.called.With(4243)
     end)
+    
+    it("sequence", function()
+        local s = stub.new()
+        local seq = mb.TickJobSequencer:new()
+        local m1 = mb.TickJobMapper:new(s, 42, 43)
+        m1.afterms = 20
+        seq:add(m1)
+        local m2 = mb.TickJobMapper:new(s, 44)
+        m2.afterms = 20
+        seq:add(m2)
+        mb.tq:add(seq)
+
+        tt.ticktock(10)
+        assert.spy(s).was.Not.called()
+
+        tt.ticktock(30)
+        assert.spy(s).was.called(2)
+
+        tt.ticktock(10)
+        assert.spy(s).was.called(2)
+
+        tt.ticktock(30)
+        assert.spy(s).was.called(3)
+    end)
 
 end)
