@@ -129,7 +129,6 @@ function mb.send_keys(after, keys, ...)
 end
 ]]--
 
---[[
 
 -- Support chaining key jobs, such as sending keys and modifiers, repeating
 -- key sequences, et cetera.
@@ -157,37 +156,45 @@ local Keys = {
     op = nil, -- current operation to be done when we hit the table call.
 }
 
-setmetatable(Keys, {
-    -- When an element (field) of the "keys" table is getting read that doesn't
-    -- exist (is nil), then the __index method gets triggered, so we can check
-    -- for any of our chaining functions...
-    __index = function(self, key)
-        self.op = self.rawget(self, "op_" .. key)
-        return self -- ...always return ourselves for further chaining
-    end,
-
-    -- When the "keys" table is being called as a function then activate the
-    -- most recent operation; this basically emulates methods using ordinary
-    -- table field and function call syntax.
-    __call = function(self, ...)
-        if self.op then
-            self.op(self, ...)
-            self.op = nil
-        end
-        return self -- ...always return ourselves for further chaining
+-- When an element (field) of the "keys" table is getting read that doesn't
+-- exist (is nil), then the __index method gets triggered, so we can check for
+-- any of our chaining functions. Please note that we must NOT hide the other
+-- fields that aren't chaining functions.
+function Keys.__index(self, key)
+    -- Try to look up the missing field as a chain operator; only if that
+    -- succeeds, then remember the chain operator for a following table call
+    -- operation. Otherwise, handle the field as any ordinary field.
+    local val = rawget(mb._keys, "op_" .. key)
+    if val then
+        self.op = val
+        return self -- ...always return ourselves for further chaining.
     end
-})
+    return rawget(self, key)
+end
+
+-- When the "keys" table is being called as a function then activate the
+-- most recent operation; this basically emulates methods using ordinary
+-- table field and function call syntax.
+function Keys.__call(self, ...)
+    if self.op then
+        self.op(self, ...)
+        self.op = nil
+    end
+    return self -- ...always return ourselves for further chaining.
+end
+
 
 mb._keys = Keys
 
 -- Initializes/resets the "virtual" mb.keys object each time it gets accessed
 -- anew, so chained key operations always start in a well-known initial state.
-function Keys:init()
-    k = {
+function Keys:new() -- luacheck: ignore 212/self
+    local k = {
         afterms = 0,
-        jobs = {}
+        jobs = {},
     }
-    return setmetatable(k, Keys)
+    k = setmetatable(k, Keys)
+    return k
 end
 
 
@@ -227,11 +234,9 @@ setmetatable(mb, {
     -- When a non-existing table element/field is to be accessed...
     __index = function(self, key)
         if key == "keys" then
-            return Keys:init()
+            return Keys:new()
         else
             return rawget(self, key)
         end
     end
 })
-
-]]--

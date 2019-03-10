@@ -68,6 +68,33 @@ describe("multibow keys", function()
 
 end)
 
+describe("key chaining operations", function()
+
+    -- Ensure that there are no snafu'd tick jobs present at the begin of each
+    -- new test, remaining from a previous (failed) test.
+    before_each(function()
+        mb.tq:clear()
+    end)
+
+    it("mb handles non-existing fields correctly", function()
+        assert.is.Nil(mb.keys.foo)
+    end)
+
+    it("gets fresh key chains each time", function()
+        local kc1 = mb.keys
+        local kc2 = mb.keys
+        assert.are.Not.equal(kc1, kc2)
+    end)
+
+    it("taps keys", function ()
+        local s = spy.on(mb._keys, "op_tap")
+        mb.keys.tap("abc")
+        assert.spy(s).was.called(1)
+    end)
+
+end)
+
+--[[
 describe("#ignore asynchronous keys", function()
 
     local tt = require("spec/snippets/ticktock")
@@ -187,3 +214,5 @@ describe("#ignore asynchronous keys", function()
     end)
 
 end)
+]]--
+
