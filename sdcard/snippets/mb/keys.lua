@@ -28,7 +28,7 @@ SOFTWARE.
 -- Our key ticker queue: its elements are keys and modifiers to press and
 -- release, one after another, so that USB HID operations won't ever take too
 -- long as to minimize tick jitter.
-mb.keys = mb.tq:new()
+mb.tq = mb.tickqueue:new()
 
 
 
@@ -67,108 +67,7 @@ function mb.tap_times(key, times, ...)
   end
 
 
-
--- Tick mappers execute a series of tick'ered function calls, passing in each
--- one of a sequence of things with each tick until done. So, this is like
--- array mappers, but this time they're broken into discrete ticks. And since
--- we sometimes need to do multiple ticked steps per element, our tick mappers
--- can also work on sequences of functions to be called for each element.
-local KeyJobMapper = {}
-KeyJobMapper.__index = KeyJobMapper
-mb.KeyJobMapper = KeyJobMapper
-
--- Creates a new tick mapper that calls a function (or a sequence of
--- functions) on every element of an array, but only one call per tick.
-function KeyJobMapper:new(func, ...) -- luacheck: ignore 212/self
-    -- Since we allow for sequences of functions, simply turn a single
-    -- function given to us into a single-element sequence. Additionally, we
-    -- need to handle the special test case where someone is giving us a
-    -- function which in fact is a table (as "busted" does with spies and
-    -- stubs). Bottom line: we need much more space to explain than to do our
-    -- thing. Sigh.
-    if type(func) == "function" or (type(func) == "table" and #func == 0) then
-        func = {func}
-    end
-    local slf = setmetatable({
-        func=func, -- the function(s) to call for each element.
-        flen=#func,
-        elements={...}, -- the elements to map onto function calls.
-        len=#{...}
-    }, KeyJobMapper)
-    slf:reset()
-    return slf
-end
-
--- Reset a tick mapper so it can be repeated (using a key repeater job).
-function KeyJobMapper:reset()
-    self.fidx = 1
-    self.idx = 1
-end
-
--- For each tick, process only the next element and next function in our list
--- until all functions for this element, and then all elements have been
--- processed. Only then declare finish by returning -1 as the "done"
--- indication. Related, return 0 if there is still work to be done on the next
--- round, or a positive "afterms" value indicating to call back only later.
-function KeyJobMapper:process()
-    -- Don't wonder why we shield this, but this way we also correctly handle
-    -- the border case of an empty list of elements to map without crashing.
-    if self.idx <= self.len then
-        self.func[self.fidx](self.elements[self.idx])
-    end
-    -- Update function index to next function in sequence, and only when we
-    -- have run all functions, then proceed with the next element.
-    self.fidx = self.fidx + 1
-    if self.fidx > self.flen then
-        self.fidx = 1
-        -- Update index to next element and indicate back whether we'll need a
-        -- further round in the future.
-        self.idx = self.idx + 1
-        return self.idx <= self.len and 0 or -1
-    end
-    -- There's always more to do, since there are more functions waiting to be
-    -- called; and we want to process the next function with the next tick.
-    return 0
-end
-
--- Repeaters allow repeating tick mappers, but also repeaters; that is, we can
--- repeat repeaters.
-local KeyJobRepeater = {}
-KeyJobRepeater.__index = KeyJobRepeater
-mb.KeyJobRepeater = KeyJobRepeater
-
--- Creates a new tick repeater that allows to repeat both tick mappers, as
--- well as repeaters.
-function KeyJobRepeater:new(keyjob, times, pause) -- luacheck: ignore 212/self
-    pause = pause or 0
-    local slf = setmetatable({
-        keyjob=keyjob,
-        times=times,
-        pause=pause
-    }, KeyJobRepeater)
-    slf:reset()
-    return slf
-end
-
--- Rest a repeater, so repeaters can repeat repeaters. (ARGH!!!)
-function KeyJobRepeater:reset()
-    self.round = 1
-end
-
-function KeyJobRepeater:process()
-    local afterms = self.keyjob:process()
-    if afterms >= 0 then return afterms end
-    -- Start the next round ... or are we done now? Please note that the next
-    -- round might be delayed if so required in order to give the applications
-    -- on the USB host system some time to process the burst of key events.
-    -- Well, that's not meant with respect to USB and USB host, but instead
-    -- the applications working on key input.
-    self.round = self.round + 1
-    -- Always reset, so repeater cascades work ... greetings to M.C.E.
-    self.keyjob:reset()
-    return self.round <= self.times and self.pause or -1
-end
-
+  --[[
 -- Convenience function mainly for TDD: adds a set of functions to be called
 -- one after another in a ticked fashion; this allows testing KeyJobMapper
 -- objects.
@@ -228,3 +127,111 @@ end
 function mb.send_keys(after, keys, ...)
     mb.send_keys_repeatedly(after, 1, 0, keys, ...)
 end
+]]--
+
+--[[
+
+-- Support chaining key jobs, such as sending keys and modifiers, repeating
+-- key sequences, et cetera.
+
+-- Simply tap some keys:
+-- mb.keys.tap("abc")
+
+-- Throw in some delay to allow applications to catch up with speedy key input:
+-- mb.keys.after(100).tap("abc").after(100).tap("def")
+
+-- Press and hold one or more modifiers while tapping a sequence of keys:
+-- mb.keys.mod(keybow.LEFT_SHIFT, keybow.LEFT_CTRL).tap("abc").tap(keybow.F10)
+
+-- More elaborate version, but without automatic enclosing:
+-- mb.keys.setmods(keybow.LEFT_SHIFT).keys("abc").releasemods(keybow.LEFT_SHIFT)
+
+-- Repeat a sequence of key operations:
+-- mb.keys.times(2).tap("abc").after(100).tap("def")
+
+-- Repeat a sequence, then send some final taps:
+-- mb.keys.times(2).tap("abc").fin.tap("def")
+
+
+local Keys = {
+    op = nil, -- current operation to be done when we hit the table call.
+}
+
+setmetatable(Keys, {
+    -- When an element (field) of the "keys" table is getting read that doesn't
+    -- exist (is nil), then the __index method gets triggered, so we can check
+    -- for any of our chaining functions...
+    __index = function(self, key)
+        self.op = self.rawget(self, "op_" .. key)
+        return self -- ...always return ourselves for further chaining
+    end,
+
+    -- When the "keys" table is being called as a function then activate the
+    -- most recent operation; this basically emulates methods using ordinary
+    -- table field and function call syntax.
+    __call = function(self, ...)
+        if self.op then
+            self.op(self, ...)
+            self.op = nil
+        end
+        return self -- ...always return ourselves for further chaining
+    end
+})
+
+mb._keys = Keys
+
+-- Initializes/resets the "virtual" mb.keys object each time it gets accessed
+-- anew, so chained key operations always start in a well-known initial state.
+function Keys:init()
+    k = {
+        afterms = 0,
+        jobs = {}
+    }
+    return setmetatable(k, Keys)
+end
+
+
+function Keys:op_after(ms)
+    self.afterms = self.afterms + ms
+    return self
+end
+
+
+function Keys:op_tap(keys)
+    return self
+end
+
+
+function Keys:op_mod(...)
+    return self
+end
+
+function Keys:op_times(t)
+    self.jobs[#self.jobs + 1] = {} -- FIXME
+    return self
+end
+
+-- Ends the most recent "block" in a chain, such as a times() and mod() block:
+-- this pops the current job of the stack of "open" key jobs.
+function Keys:op_fin()
+    if #self.jobs > 0 then
+        table.remove(self.jobs, #self.jobs)
+    end
+    return self
+end
+
+
+-- Sets up a "virtual" mb.keys object that is returned in a defined init state
+-- each time the "mb.keys" element gets accessed.
+setmetatable(mb, {
+    -- When a non-existing table element/field is to be accessed...
+    __index = function(self, key)
+        if key == "keys" then
+            return Keys:init()
+        else
+            return rawget(self, key)
+        end
+    end
+})
+
+]]--

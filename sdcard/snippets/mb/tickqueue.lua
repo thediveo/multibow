@@ -1,4 +1,7 @@
--- Multibow internal "module" implementing a "ticking" (key) queue.
+-- Multibow internal "module" implementing a "ticking" queue for background
+-- jobs that need to be executed piecemeal-wise instead of in a single run.
+-- The most prominent application is for sending USB keystrokes to the USB
+-- host piece by piece, one stroke at each tick only.
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -22,22 +25,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 ]]--
 
-local tq = {}
-tq.__index = tq
+local tickqueue = {}
+tickqueue.__index = tickqueue
 
 -- Creates a new ticking queue. All elements are stored in a singly linked
 -- list, with only the first (foremost) list element being active and
 -- processed when ticking along. Only after the first element has finished its
 -- processing it gets removed and the next element moves into first position,
 -- getting processed next.
-function tq:new() -- luacheck: ignore 212/self
-    local slf = setmetatable({}, tq)
+function tickqueue:new() -- luacheck: ignore 212/self
+    local slf = setmetatable({}, tickqueue)
     slf:clear()
     return slf
 end
 
 -- Convenience for TDD
-function tq:clear()
+function tickqueue:clear()
     self.head = nil
     self.tail = nil
     self.at = nil
@@ -47,7 +50,7 @@ end
 -- Adds another element to this ticking queue, waiting to be processed when
 -- its turn finally has come. Additionally, start of processing for this
 -- element can be delayed if necessary by the given timespan.
-function tq:add(element, afterms)
+function tickqueue:add(element, afterms)
     element.afterms = afterms or 0
     -- Add the new element to the tail of this list, and move the tail
     -- accordingly to point to our new trailing element.
@@ -71,7 +74,7 @@ end
 -- call me again the next time (erm, tick). And a positive value indicates to
 -- call again, but this time after the amount of ms as indicated by the return
 -- value.
-function tq:process(now)
+function tickqueue:process(now)
     self.now = now
     if self.head == nil then return end
     -- Did we already pass the time where the head element in this queue is
@@ -95,4 +98,4 @@ function tq:process(now)
     end
 end
 
-return tq -- module
+return tickqueue -- module

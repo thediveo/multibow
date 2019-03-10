@@ -21,7 +21,7 @@ SOFTWARE.
 ]]--
 
 require "mocked-keybow"
-local tq = require("snippets/mb/tickqueue")
+local tickqueue = require("snippets/mb/tickqueue")
 
 local now = 0
 local process = function(q, ms)
@@ -56,7 +56,7 @@ end
 describe("ticking queue", function()
 
     it("processes a single entry with initial delay the expected number of times", function()
-        local q = tq:new()
+        local q = tickqueue:new()
         local s = stub.new()
         q:add(El:new(s, 2), 20)
 
@@ -68,7 +68,7 @@ describe("ticking queue", function()
     end)
 
     it("processes a single entry with intermediate delays", function()
-        local q = tq:new()
+        local q = tickqueue:new()
         local s = stub.new()
         q:add(El:new(s, 2, 20), 0)
 
@@ -88,7 +88,7 @@ describe("ticking queue", function()
     end)
 
     it("processes multiple entries with intermediate delay", function()
-        local q = tq:new()
+        local q = tickqueue:new()
         local s = stub.new()
         q:add(El:new())
         q:add(El:new(s), 20)

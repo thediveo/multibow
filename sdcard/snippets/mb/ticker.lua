@@ -42,5 +42,5 @@ function tick(now)
         mb.timers:remove()
         tim:trigger(now)
     end
-    mb.keys:process(now)
+    mb.tq:process(now)
 end
