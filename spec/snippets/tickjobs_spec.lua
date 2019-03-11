@@ -115,7 +115,7 @@ describe("tick jobs", function()
         assert.spy(after).was.called.With(4242)
         assert.spy(after).was.called.With(4243)
     end)
-    
+
     it("sequence", function()
         local s = stub.new()
         local seq = mb.TickJobSequencer:new()

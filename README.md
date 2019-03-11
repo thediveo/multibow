@@ -20,6 +20,19 @@ switch between the installed layouts by pressing a special key combination
 > Raspberry Pi. And yes, these days even _keyboards_ now run Linux and script
 > interpreters...
 
+Features in a nutshell:
+
+- **multiple keyboard layouts**, switchable during operation.
+- **three LED brightness levels**, can also be changed during operation.
+- supports (multiple) **SHIFT layers** in layouts.
+- **self-descriptive keystroke chains**, such as
+  `mb.tap("abc").tap(keybow.ENTER)`, including SHIFT/CTRL and repeating
+  keystroke sequences or parts thereof. Sending keystroke chains via USB to
+  the host is done non-blocking in the background (without multithreading).
+- **one-shot and recurring alarms** that run your own keyboard layout
+  functions in the background (without multithreading, so no locking and
+  threading complexity).
+
 And yes, this is probably a New Year's project slightly gone overboard ...
 what sane reason is there to end up with a Lua-scripted multi-layout keyboard
 "operating" system and a bunch of automated unit test cases?
@@ -200,7 +213,7 @@ You may want to start from our template in `layouts/keymap-template.lua`.
       ```lua
       km.keymap = {
         -- ...
-        [0] = { c={r=1, g=1, b=1}, press=function() mb.tap("a") end},
+        [0] = { c={r=1, g=1, b=1}, press=function() mb.key.tap("a") end},
       }
       ```
 
@@ -211,7 +224,7 @@ You may want to start from our template in `layouts/keymap-template.lua`.
 
       ```lua
       function km.mypress(keyno)
-        mb.tap("a")
+        mb.key.tap("a")
       end
 
       km.keymap = {
@@ -224,12 +237,71 @@ You may want to start from our template in `layouts/keymap-template.lua`.
       ```lua
       km.keymap = {
         -- ...
-        [2] = { c={r=1, g=1, b=1}, release=function() mb.tap("x") end},
+        [2] = { c={r=1, g=1, b=1}, release=function() mb.key.tap("x") end},
       }
       ```
 
 For more details and examples, please have a look at the keyboard layouts in
 `layouts/vsc-golang.lua` and `layouts/kdenlive.lua`.
+
+## Keystroke Chains
+
+Multibow features describing the keystrokes to be sent via USB to a host
+using so-called keystroke operation chains. Those who have worked with
+assertion libraries, such as [luassert](https://github.com/Olivine-Labs/luassert)
+will notice the influence here.
+
+You simply start from `mb.keys.`... and then tack on the keystrokes you want to send.
+Simply chain multiple keystroke operations together, such as when typing "multibow"
+and then pressing the ENTER key:
+
+```lua
+mb.keys.tap("multibow").tap(keybow.ENTER)
+```
+
+- `tap("abc")` and `tap(keybow.ENTER)`: taps a string of characters, or a single key,
+  such as the ENTER key. Tapping here means first pressing a certain, then releasing
+  this key, and only then proceed with the next key to be tapped.
+
+  ```lua
+  mb.keys.tap("multibow").tap(keybow.ENTER)
+  ```
+
+- `left()`, `right()`, `up()`, and `down()`: taps the corresponding cursor arrow key.
+  You can drop the `()` unless you arrow key tap is the last element in a keystroke
+  chain (due to restrictions in Lua).
+
+- `shift()`, `control()`, `alt()`, `meta()`: presses and holds the SHIFT/CTRL/ALT/META
+  modifier key while tapping the following keystrokes, and releases the SHIFT/CTRL
+  modifier afterwards. All chained keystrokes following are enclosed by these keyboard
+  modifiers until the end of the chain, or alternatively a `fin` chain element (see
+  below for details). Multiple modifiers can be chained as usual.
+
+  ```lua
+  mb.keys.tap("multibow").ctrl.shift.tap(keybow.ENTER)
+  ```
+
+- `mod(m, ...)`: presses and holds a set of keyboard modifiers (SHIFT, CTRL, ...) while
+  tapping the following keystrokes, and releases the keyboard modifiers thereafter. All
+  following keystroke chain elements are enclosed, or until the next `fin` in the chain.
+  Depending on your preferences, you might want to use `shift`, `ctrl` instead.
+
+  ```lua
+  mb.keys.mod(keybow.LEFT_SHIFT, keybow.LEFT_CTRL).tap("multibow")
+  ```
+
+- `times(x)` and `times(x)`...`fin`...: repeats the following keystroke chain the
+  specified number of times. The following chain either ends implicitly at the end
+  of this keystroke chain, or alternatively at any earlier point using the `fin()`
+  element. Pro tip: you can drop the function call brackets to save, erm, keystrokes.
+
+- `fin()`: terminates a sub chain, started by `mod()`, `shift()`, `ctrl()`, and
+  `times()`. This allows for convenient and highly self-descriptive single-liners,
+  such as:
+
+  ```lua
+  mb.keys.ctrl.tap(keybow.ENTER).fin.tap("multibow")
+  ```
 
 ## Licenses
 

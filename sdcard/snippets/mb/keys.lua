@@ -104,6 +104,14 @@ function Keys.__index(self, key)
     -- operation. Otherwise, handle the field as any ordinary field.
     local val = rawget(Keys, "op_" .. key)
     if val then
+        -- If there's already an operation pending, then offer the convenience
+        -- of calling it first, before the store the new operation for later
+        -- processing. This allows dropping the function call brackets when
+        -- chaining arg-less operations (except for the last operation in a
+        -- chain, which would otherwise never get called).
+        if self.op then
+            self.op(self) -- no further args given.
+        end
         self.op = val
         return self -- ...always return ourselves for further chaining.
     end
@@ -192,6 +200,9 @@ function Keys:op_after(ms)
     return self
 end
 
+-- The "wait()" chain operation is an alias of "after()".
+Keys.wait = Keys.after
+
 -- The "tap()" chain operation taps a string or a single key. Since it is easy
 -- to chain tap()s, we do not need to support an array of keys here ... famous
 -- last words.
@@ -235,6 +246,47 @@ function Keys:op_mod(...)
     return self
 end
 
+-- The "shift()" chain operation encloses the following chain operations with
+-- pressing the (left) SHIFT modifier, then releasing SHIFT afterwards.
+function Keys:op_shift()
+    return self:op_mod(keybow.LEFT_SHIFT)
+end
+
+-- The "ctrl()" chain operation encloses the following chain operations with
+-- pressing the (left) CTRL modifier, then releasing CTRL afterwards.
+function Keys:op_ctrl()
+    return self:op_mod(keybow.LEFT_CTRL)
+end
+
+-- The "alt()" chain operation encloses the following chain operations with
+-- pressing the (left) ALT modifier, then releasing ALT afterwards.
+function Keys:op_ctrl()
+    return self:op_mod(keybow.LEFT_ALT)
+end
+
+-- The "meta()" chain operation encloses the following chain operations with
+-- pressing the (left) META modifier, then releasing META afterwards.
+function Keys:op_ctrl()
+    return self:op_mod(keybow.LEFT_META)
+end
+
+-- Cursor arrow key chain operations...
+function Keys:op_left()
+    return self:op_tap(keybow.LEFT_ARROW)
+end
+
+function Keys:op_right()
+    return self:op_tap(keybow.RIGHT_ARROW)
+end
+
+function Keys:op_up()
+    return self:op_tap(keybow.UP_ARROW)
+end
+
+function Keys:op_down()
+    return self:op_tap(keybow.DOWN_ARROW)
+end
+
 -- The "times()" chain operation repeats the following chain operations as
 -- many times as specified. The block of repeated operations can be explicitly
 -- finished using the "fin()" operation, otherwise it will be the end of the
@@ -276,7 +328,10 @@ end
 
 
 -- Sets up a "virtual" mb.keys object that is returned in a defined init state
--- each time the "mb.keys" element gets accessed.
+-- each time the "mb.keys" element gets accessed. For this, we need to give
+-- the mb object (table) a special "__index" meta function that handles
+-- "mb.keys" in a special way, but otherwise works as before for all other
+-- fields of the mb object/table.
 setmetatable(mb, {
     -- When a non-existing table element/field is to be accessed...
     __index = function(self, key)
