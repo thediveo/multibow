@@ -145,6 +145,35 @@ describe("key chaining operations", function()
         assert.spy(m).was.called.With(keybow.LEFT_CTRL, keybow.KEY_UP)
     end)
 
+    it("alts keys", function()
+        local m = spy.on(keybow, "set_modifier")
+        mb.keys.alt.tap("a")
+        tt.ticktock(100)
+        assert.spy(m).was.called(2)
+        assert.spy(m).was.called.With(keybow.LEFT_ALT, keybow.KEY_DOWN)
+        assert.spy(m).was.called.With(keybow.LEFT_ALT, keybow.KEY_UP)
+    end)
+
+    it("metas keys", function()
+        local m = spy.on(keybow, "set_modifier")
+        mb.keys.meta.tap("a")
+        tt.ticktock(100)
+        assert.spy(m).was.called(2)
+        assert.spy(m).was.called.With(keybow.LEFT_META, keybow.KEY_DOWN)
+        assert.spy(m).was.called.With(keybow.LEFT_META, keybow.KEY_UP)
+    end)
+
+    it("arrows around", function()
+        local t = spy.on(keybow, "set_key")
+        mb.keys.left.right.up.down()
+        tt.ticktock(100)
+        assert.spy(t).was.called(2*4)
+        for _, arr in pairs({keybow.LEFT_ARROW, keybow.RIGHT_ARROW, 
+                             keybow.UP_ARROW, keybow.DOWN_ARROW}) do
+            assert.spy(t).was.called_with(arr, keybow.KEY_DOWN)
+        end
+    end)
+
     it("repeats keys", function()
         local s = spy.on(keybow, "set_key")
         mb.keys.times(3).tap("abc")
@@ -178,6 +207,28 @@ describe("key chaining operations", function()
 
     it("surplus fin", function()
         mb.keys.fin()
+    end)
+
+    it("waits before operation", function()
+        tt.ticktock(10) -- initialize tickerqueue time ... wtf?
+        local s = spy.on(keybow, "set_key")
+        mb.keys.wait(10).wait(10).tap("x")
+        tt.ticktock(10)
+        assert.spy(s).was.Not.called()
+        tt.ticktock(50)
+        assert.spy(s).was.called(2*1)
+    end)
+
+    it("spaces repeats", function()
+        tt.ticktock(10) -- initialize tickerqueue time ... wtf?
+        local s = spy.on(keybow, "set_key")
+        mb.keys.times(2).space(50).tap("x")
+        tt.ticktock(20)
+        assert.spy(s).was.called(2*1)
+        tt.ticktock(40)
+        assert.spy(s).was.called(2*1)
+        tt.ticktock(100)
+        assert.spy(s).was.called(2*2)
     end)
 
 end)

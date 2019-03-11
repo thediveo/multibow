@@ -148,7 +148,7 @@ function Keys:op_after(ms)
 end
 
 -- The "wait()" chain operation is an alias of "after()".
-Keys.wait = Keys.after
+Keys.op_wait = Keys.op_after
 
 -- The "tap()" chain operation taps a string or a single key. Since it is easy
 -- to chain tap()s, we do not need to support an array of keys here ... famous
@@ -258,9 +258,7 @@ function Keys:op_space(ms)
 end
 
 -- The "apart()" chain operation is an alias for the "space()" operation.
-function Keys:op_apart(ms)
-    return self:op_space(ms)
-end
+Keys.op_apart = Keys.op_space
 
 -- The "fin()" operation ends the innermost "block" in a chain, such as a
 -- "times()" and "mod()" operations block: this pops the current tick job off
