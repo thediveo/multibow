@@ -180,7 +180,7 @@ function TickJobRepeater:process()
 end
 
 
--- Enclose another tick job in "before" and "after" function mappers.
+-- Encloses another tick job in "before" and "after" function mappers.
 local TickJobEncloser = {}
 TickJobEncloser.__index = TickJobEncloser
 mb.TickJobEncloser = TickJobEncloser
@@ -241,11 +241,15 @@ function TickJobEncloser:process()
     return self.idx <= self.len and 0 or -1
 end
 
--- A sequence of tick jobs.
+
+-- Sequences a list of tick jobs, allowing for easy subgrouping multiple key
+-- tick operations for repeating, modifier keys, et cetera.
 local TickJobSequencer = {}
 TickJobSequencer.__index = TickJobSequencer
 mb.TickJobSequencer = TickJobSequencer
 
+-- Creates a new tick job sequence; the tick jobs to be sequenced can be added
+-- later using the add() method.
 function TickJobSequencer:new() -- luacheck: ignore 212/self
     local slf = setmetatable({
         tickjobs = {}
@@ -254,6 +258,7 @@ function TickJobSequencer:new() -- luacheck: ignore 212/self
     return slf
 end
 
+-- Properly resets a sequence, so that it can be repeated.
 function TickJobSequencer:reset()
     self.idx = 0 -- note an optional wait phase for the first sub job.
     self.jobs = #self.tickjobs -- keep number of subjobs
@@ -262,12 +267,16 @@ function TickJobSequencer:reset()
     end
 end
 
+-- Adds another tick job to this sequence.
 function TickJobSequencer:add(tickjob)
     tickjob.afterms = tickjob.afterms or 0
     table.insert(self.tickjobs, tickjob)
     self.jobs = #self.tickjobs
 end
 
+-- Processes this sequence, ensuring proper processing of the sequenced tick
+-- jobs. This includes obeying initial "afterms" delays of the sub tick jobs
+-- in the sequence.
 function TickJobSequencer:process()
     if self.idx == 0 then
         self.idx = 1

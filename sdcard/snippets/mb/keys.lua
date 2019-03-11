@@ -30,65 +30,12 @@ SOFTWARE.
 -- long as to minimize tick jitter.
 mb.tq = mb.tickqueue:new()
 
-
-
--- Default delay between rapidly (repeated) key presses, can be overridden.
-mb.KEY_DELAY_MS = mb.KEY_DELAY_MS or 100
-
--- Delay between key presses
-function mb.delay()
-    keybow.sleep(mb.KEY_DELAY_MS)
-end
-
--- Sends a single key tap to the USB host, optionally with modifier keys, such
--- as SHIFT (keybow.LEFT_SHIFT), CTRL (keybow.LEFT_CTRL), et cetera. The "key"
--- parameter can be a string or a Keybow key code, such as keybow.HOME, et
--- cetera.
-function mb.tap(key, ...)
-    mb.tap_times(key, 1, ...)
-end
-
--- Taps the same key multiple times, optionally with modifier keys; however,
--- for optimization, these modifiers are only pressed once before the tap
--- sequence, and only released once after all taps.
-function mb.tap_times(key, times, ...)
-    for modifier_argno = 1, select("#", ...) do
-        local modifier = select(modifier_argno, ...)
-        if modifier then keybow.set_modifier(modifier, keybow.KEY_DOWN) end
-      end
-      for _ = 1, times do
-        keybow.tap_key(key)
-        mb.delay()
-    end
-    for modifier_argno = 1, select("#", ...) do
-        local modifier = select(modifier_argno, ...)
-        if modifier then keybow.set_modifier(modifier, keybow.KEY_UP) end
-      end
-  end
-
-
--- Support chaining key jobs, such as sending keys and modifiers, repeating
--- key sequences, et cetera.
-
--- Simply tap some keys:
--- mb.keys.tap("abc")
-
--- Throw in some delay to allow applications to catch up with speedy key input:
--- mb.keys.after(100).tap("abc").after(100).tap("def")
-
--- Press and hold one or more modifiers while tapping a sequence of keys:
--- mb.keys.mod(keybow.LEFT_SHIFT, keybow.LEFT_CTRL).tap("abc").tap(keybow.F10)
-
--- More elaborate version, but without automatic enclosing:
--- mb.keys.setmods(keybow.LEFT_SHIFT).keys("abc").releasemods(keybow.LEFT_SHIFT)
-
--- Repeat a sequence of key operations:
--- mb.keys.times(2).tap("abc").after(100).tap("def")
-
--- Repeat a sequence, then send some final taps:
--- mb.keys.times(2).tap("abc").fin.tap("def")
-
-
+-- Our "modern" API for sending USB keystrokes to the host is highly inspired
+-- by assertion chains, such as luassert: this allows programming sequences of
+-- keystrokes in a highly self-descriptive manner using "mb.keys" using chains
+-- of key taps, modifier keys, repeating stroke sequences, and some other
+-- crazy stuff. See README.md for a detailed description, as well as the
+-- example layouts.
 local Keys = {
     op = nil, -- current operation to be done when we hit the table call.
     afterms = 0, -- accumulated delay before any operation except after().
@@ -196,7 +143,7 @@ end
 -- they will all add up. The delay gets reset at the beginning of each chain,
 -- as well as with the next operation which is not an after().
 function Keys:op_after(ms)
-    self.afterms = (self.afterms or 0) + ms
+    self.afterms = (self.afterms or 0) + (ms or 0)
     return self
 end
 
@@ -260,13 +207,13 @@ end
 
 -- The "alt()" chain operation encloses the following chain operations with
 -- pressing the (left) ALT modifier, then releasing ALT afterwards.
-function Keys:op_ctrl()
+function Keys:op_alt()
     return self:op_mod(keybow.LEFT_ALT)
 end
 
 -- The "meta()" chain operation encloses the following chain operations with
 -- pressing the (left) META modifier, then releasing META afterwards.
-function Keys:op_ctrl()
+function Keys:op_meta()
     return self:op_mod(keybow.LEFT_META)
 end
 
@@ -342,3 +289,29 @@ setmetatable(mb, {
         end
     end
 })
+
+-- Legacy keystroke "classic" API support ... to be removed in the near
+-- future.
+
+-- Sends a single key tap to the USB host, optionally with modifier keys, such
+-- as SHIFT (keybow.LEFT_SHIFT), CTRL (keybow.LEFT_CTRL), et cetera. The "key"
+-- parameter can be a string or a Keybow key code, such as keybow.HOME, et
+-- cetera.
+function mb.tap(key, ...)
+    if select("#", ...) > 0 then
+        mb.keys.mod(...).tap(key)
+    else
+        mb.keys.tap(key)
+    end
+end
+
+-- Taps the same key multiple times, optionally with modifier keys; however,
+-- for optimization, these modifiers are only pressed once before the tap
+-- sequence, and only released once after all taps.
+function mb.tap_times(key, x, ...)
+    if select("#", ...) > 0 then
+        mb.keys.mod(...).times(x).tap(key)
+    else
+        mb.keys.times(x).tap(key)
+    end
+end

@@ -22,6 +22,7 @@ SOFTWARE.
 
 require "mocked-keybow"
 local hwk = require("spec/hwkeys")
+local tt = require("spec/snippets/ticktock")
 
 
 describe("Kdenlive keymap", function()
@@ -91,6 +92,7 @@ describe("Kdenlive keymap", function()
             hwk.tap(shift.KEY_SHIFT)
             assert.equals(k.keymap_shifted.name, mb.current_keymap.name)
             hwk.tap(k.KEY_CLIP_BEGIN)
+            tt.ticktock(100)
             assert.spy(s).was.called(1)
             assert.spy(sm).was.called()
         end)
