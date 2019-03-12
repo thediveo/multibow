@@ -59,7 +59,7 @@ km.keymap = {
     -- The index entries below are defining keys as to their LED color and
     -- what key taps should be send to the USB host to which your Keybow is
     -- connected to.
-    [0] = { c={r=1, g=1, b=1}, press=function() mb.tap("a") end},
+    [0] = { c={r=1, g=1, b=1}, press=function() mb.keys.tap("a") end},
     [1] = { c={r=1, g=1, b=1}, press=km.mypress},
     [2] = { c={r=1, g=1, b=1}, release=km.myrelease},
 }

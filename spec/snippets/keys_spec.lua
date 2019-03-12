@@ -168,10 +168,19 @@ describe("key chaining operations", function()
         mb.keys.left.right.up.down()
         tt.ticktock(100)
         assert.spy(t).was.called(2*4)
-        for _, arr in pairs({keybow.LEFT_ARROW, keybow.RIGHT_ARROW, 
+        for _, arr in pairs({keybow.LEFT_ARROW, keybow.RIGHT_ARROW,
                              keybow.UP_ARROW, keybow.DOWN_ARROW}) do
             assert.spy(t).was.called_with(arr, keybow.KEY_DOWN)
         end
+    end)
+
+    it("accepts UPPerCAse OPerAtiONs", function()
+        local t = spy.on(keybow, "set_key")
+        mb.keys.End()
+        tt.ticktock(100)
+        assert.spy(t).was.called(2)
+        assert.spy(t).was.called.with(keybow.END, keybow.KEY_DOWN)
+        assert.spy(t).was.called.with(keybow.END, keybow.KEY_UP)
     end)
 
     it("repeats keys", function()
@@ -190,9 +199,9 @@ describe("key chaining operations", function()
         assert.spy(s).was.called(3*2*(1+2+1))
     end)
 
-    it("fin ends repeating sequence block", function()
+    it("fin/done ends repeating sequence block", function()
         local s = spy.on(keybow, "set_key")
-        mb.keys.times(2).tap("a").tap("b").fin().tap("c")
+        mb.keys.times(2).tap("a").tap("b").done.tap("c")
         assert.spy(s).was.called(0)
         tt.ticktock(300)
         assert.spy(s).was.called(2*2*(1+1)+2*1)

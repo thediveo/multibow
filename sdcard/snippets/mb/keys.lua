@@ -49,7 +49,7 @@ function Keys.__index(self, key)
     -- Try to look up the missing field as a chain operator; only if that
     -- succeeds, then remember the chain operator for a following table call
     -- operation. Otherwise, handle the field as any ordinary field.
-    local val = rawget(Keys, "op_" .. key)
+    local val = rawget(Keys, "op_" .. key:lower())
     if val then
         -- If there's already an operation pending, then offer the convenience
         -- of calling it first, before the store the new operation for later
@@ -185,7 +185,7 @@ end
 -- operation, otherwise the end of the whole chain is taken.
 function Keys:op_mod(...)
     self:addtickjobblock(mb.TickJobEncloser:new(
-        nil, -- preliminary
+        nil, -- preliminary, will be set later when we see the next operation.
         function(mod) keybow.set_modifier(mod, keybow.KEY_DOWN) end,
         function(mod) keybow.set_modifier(mod, keybow.KEY_UP) end,
         ... -- modifier(s)
@@ -234,6 +234,14 @@ function Keys:op_down()
     return self:op_tap(keybow.DOWN_ARROW)
 end
 
+function Keys:op_home()
+    return self:op_tap(keybow.HOME)
+end
+
+function Keys:op_end()
+    return self:op_tap(keybow.END)
+end
+
 -- The "times()" chain operation repeats the following chain operations as
 -- many times as specified. The block of repeated operations can be explicitly
 -- finished using the "fin()" operation, otherwise it will be the end of the
@@ -241,7 +249,7 @@ end
 -- using the "space()" and "apart()" operations.
 function Keys:op_times(times)
     self:addtickjobblock(mb.TickJobRepeater:new(
-        nil, -- preliminary
+        nil, -- preliminary, will be set later when we see the next operation.
         times,
         0 -- and no pause; this can later be changed using "space()"/"apart()".
     ))
@@ -271,6 +279,9 @@ function Keys:op_fin()
     return self
 end
 
+-- "done()" is an alias for "fin()".
+Keys.op_done = Keys.op_fin
+
 
 -- Sets up a "virtual" mb.keys object that is returned in a defined init state
 -- each time the "mb.keys" element gets accessed. For this, we need to give
@@ -287,29 +298,3 @@ setmetatable(mb, {
         end
     end
 })
-
--- Legacy keystroke "classic" API support ... to be removed in the near
--- future.
-
--- Sends a single key tap to the USB host, optionally with modifier keys, such
--- as SHIFT (keybow.LEFT_SHIFT), CTRL (keybow.LEFT_CTRL), et cetera. The "key"
--- parameter can be a string or a Keybow key code, such as keybow.HOME, et
--- cetera.
-function mb.tap(key, ...)
-    if select("#", ...) > 0 then
-        mb.keys.mod(...).tap(key)
-    else
-        mb.keys.tap(key)
-    end
-end
-
--- Taps the same key multiple times, optionally with modifier keys; however,
--- for optimization, these modifiers are only pressed once before the tap
--- sequence, and only released once after all taps.
-function mb.tap_times(key, x, ...)
-    if select("#", ...) > 0 then
-        mb.keys.mod(...).times(x).tap(key)
-    else
-        mb.keys.times(x).tap(key)
-    end
-end

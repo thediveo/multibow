@@ -213,7 +213,7 @@ You may want to start from our template in `layouts/keymap-template.lua`.
       ```lua
       km.keymap = {
         -- ...
-        [0] = { c={r=1, g=1, b=1}, press=function() mb.key.tap("a") end},
+        [0] = { c={r=1, g=1, b=1}, press=function() mb.keys.tap("a") end},
       }
       ```
 
@@ -224,7 +224,7 @@ You may want to start from our template in `layouts/keymap-template.lua`.
 
       ```lua
       function km.mypress(keyno)
-        mb.key.tap("a")
+        mb.keys.tap("a")
       end
 
       km.keymap = {
@@ -237,7 +237,7 @@ You may want to start from our template in `layouts/keymap-template.lua`.
       ```lua
       km.keymap = {
         -- ...
-        [2] = { c={r=1, g=1, b=1}, release=function() mb.key.tap("x") end},
+        [2] = { c={r=1, g=1, b=1}, release=function() mb.keys.tap("x") end},
       }
       ```
 
@@ -259,6 +259,15 @@ and then pressing the ENTER key:
 mb.keys.tap("multibow").tap(keybow.ENTER)
 ```
 
+Please note that keystroke operations, such as `tap()` can be spelled not only in
+lowercase, but also in MixedCase and UPPERCASE, as you like. This is actually a neat
+trick to allow tapping the END key by simply writing `End`, when `end` would be an
+invalid operation because it's a reserved word in Lua:
+
+```lua
+mb.keys.End()
+```
+
 - `tap("abc")` and `tap(keybow.ENTER)`: taps a string of characters, or a single key,
   such as the ENTER key. Tapping here means first pressing a certain, then releasing
   this key, and only then proceed with the next key to be tapped.
@@ -270,6 +279,9 @@ mb.keys.tap("multibow").tap(keybow.ENTER)
 - `left()`, `right()`, `up()`, and `down()`: taps the corresponding cursor arrow key.
   You can drop the `()` unless you arrow key tap is the last element in a keystroke
   chain (due to restrictions in Lua).
+
+- `home()` and `End()`: HOME and END keys, you get the drift. Since `end` is a reserved
+  word in Lua, you cannot use `end()` but must use `End` instead.
 
 - `shift()`, `control()`, `alt()`, `meta()`: presses and holds the SHIFT/CTRL/ALT/META
   modifier key while tapping the following keystrokes, and releases the SHIFT/CTRL
@@ -295,7 +307,7 @@ mb.keys.tap("multibow").tap(keybow.ENTER)
   of this keystroke chain, or alternatively at any earlier point using the `fin()`
   element. Pro tip: you can drop the function call brackets to save, erm, keystrokes.
 
-- `fin()`: terminates a sub chain, started by `mod()`, `shift()`, `ctrl()`, and
+- `fin()` and `done`: terminates a sub chain, started by `mod()`, `shift()`, `ctrl()`, and
   `times()`. This allows for convenient and highly self-descriptive single-liners,
   such as:
 

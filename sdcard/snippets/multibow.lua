@@ -39,6 +39,7 @@ require(mb.path .. "mb/morekeys")
 require(mb.path .. "mb/keymaps")
 require(mb.path .. "mb/tickjobs")
 require(mb.path .. "mb/keys")
+require(mb.path .. "mb/keyslegacy")
 require(mb.path .. "mb/routehandlers")
 require(mb.path .. "mb/leds")
 

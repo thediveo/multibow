@@ -68,13 +68,15 @@ k.COLOR_UNSHIFTED = k.COLOR_UNSHIFTED or {r=0, g=1, b=0}
 k.COLOR_SHIFTED = k.COLOR_SHIFTED or {r=1, g=0, b=0}
 
 
-function k.play_around_mouse(...)
-    mb.tap("p")
-    mb.tap_times(keybow.LEFT_ARROW, 3, keybow.LEFT_SHIFT)
-    mb.tap("i")
-    mb.tap_times(keybow.RIGHT_ARROW, 3, keybow.LEFT_SHIFT)
-    mb.tap("o")
-    mb.tap(...)
+function k.play_around_mouse(key, mod)
+    -- Keybow's keystroke API allows easy chaining of strokes...
+    mb.keys
+        .tap("p")
+        .shift.times(3).left.fin.fin
+        .tap("i")
+        .shift.times(3).right.fin.fin
+        .tap("o")
+        .mod(mod).tap(key)
 end
 
 
@@ -98,17 +100,17 @@ end
 
 k.keymap = k.init_color({
     name="kdenlive",
-    [k.KEY_ZONE_BEGIN] = {press=function() mb.tap("I") end},
-    [k.KEY_ZONE_END] = {press=function() mb.tap("O") end},
-    [k.KEY_CLIP_BEGIN] = {press=function() mb.tap(keybow.HOME) end},
-    [k.KEY_CLIP_END] = {press=function() mb.tap(keybow.END) end},
+    [k.KEY_ZONE_BEGIN] = {press=function() mb.keys.tap("I") end},
+    [k.KEY_ZONE_END] = {press=function() mb.keys.tap("O") end},
+    [k.KEY_CLIP_BEGIN] = {press=function() mb.keys.Home() end},
+    [k.KEY_CLIP_END] = {press=function() mb.keys.End() end},
     [k.KEY_PLAY_AROUND_MOUSE] = {press=function() k.play_around_mouse(keybow.SPACE, keybow.LEFT_CTRL) end},
 }, k.COLOR_UNSHIFTED)
 k.keymap_shifted = k.init_color({
     name="kdenlive-shifted",
     secondary=true,
-    [k.KEY_PROJECT_BEGIN] = {press=function() mb.tap(keybow.HOME, keybow.LEFT_CTRL) end},
-    [k.KEY_PROJECT_END] = {press=function() mb.tap(keybow.END, keybow.LEFT_CTRL) end},
+    [k.KEY_PROJECT_BEGIN] = {press=function() mb.keys.ctrl.Home() end},
+    [k.KEY_PROJECT_END] = {press=function() mb.keys.ctrl.End() end},
     [k.KEY_PLAY_AROUND_MOUSE] = {press=function() k.play_around_mouse(keybow.SPACE, keybow.LEFT_ALT) end},
     [-1] = {release=k.unshift},
 }, k.COLOR_SHIFTED)

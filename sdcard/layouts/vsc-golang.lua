@@ -87,10 +87,10 @@ vscgo.COLOR_CLOSEPANEL = vscgo.COLOR_CLOSEPANEL or vscgo.RED
 
 -- luacov: disable
 function vscgo.command(cmd)
-    mb.tap("P", keybow.LEFT_SHIFT, keybow.LEFT_CTRL)
-    keybow.sleep(100)
-    keybow.text(cmd)
-    keybow.tap_enter()
+    mb.keys
+        .shift.ctrl.tap("P").fin
+        .wait(100)
+        .tap(cmd).tap(keybow.ENTER)
 end
 
 function vscgo.go_test_package(_)
@@ -101,15 +101,15 @@ end
 -- luacheck: ignore 631
 vscgo.keymap = {
     name="vsc-golang-debug",
-    [vscgo.KEY_RUN] = {c=vscgo.COLOR_RUN, press=function(_) mb.tap(keybow.F5, keybow.LEFT_CTRL) end},
-    [vscgo.KEY_STOP] = {c=vscgo.COLOR_STOP, press=function(_) mb.tap(keybow.F5, keybow.LEFT_SHIFT) end},
-    [vscgo.KEY_RELOAD] = {c=vscgo.COLOR_RELOAD, press=function(_) mb.tap(keybow.F5, keybow.LEFT_SHIFT, keybow.LEFT_CTRL) end},
+    [vscgo.KEY_RUN] = {c=vscgo.COLOR_RUN, press=function(_) mb.keys.ctrl.tap(keybow.F5) end},
+    [vscgo.KEY_STOP] = {c=vscgo.COLOR_STOP, press=function(_) mb.keys.shift.tap(keybow.F5) end},
+    [vscgo.KEY_RELOAD] = {c=vscgo.COLOR_RELOAD, press=function(_) mb.keys.shift.ctrl.tap(keybow.F5) end},
     [vscgo.KEY_TESTPKG] = {c=vscgo.COLOR_TESTPKG, press=vscgo.go_test_package},
 
-    [vscgo.KEY_CONT] = {c=vscgo.COLOR_CONT, press=function(_) mb.tap(keybow.F5) end},
-    [vscgo.KEY_STEPINTO] = {c=vscgo.COLOR_STEPINTO, press=function(_) mb.tap(keybow.F11) end},
-    [vscgo.KEY_STEPOVER] = {c=vscgo.COLOR_STEPOVER, press=function(_) mb.tap(keybow.F10) end},
-    [vscgo.KEY_STEPOUT] = {c=vscgo.COLOR_STEPOUT, press=function(_) mb.tap(keybow.F11, keybow.LEFT_SHIFT) end},
+    [vscgo.KEY_CONT] = {c=vscgo.COLOR_CONT, press=function(_) mb.keys.tap(keybow.F5) end},
+    [vscgo.KEY_STEPINTO] = {c=vscgo.COLOR_STEPINTO, press=function(_) mb.keys.tap(keybow.F11) end},
+    [vscgo.KEY_STEPOVER] = {c=vscgo.COLOR_STEPOVER, press=function(_) mb.keys.tap(keybow.F10) end},
+    [vscgo.KEY_STEPOUT] = {c=vscgo.COLOR_STEPOUT, press=function(_) mb.keys.shift.tap(keybow.F11) end},
 
     [vscgo.KEY_VIEWOUTPUT] = {c=vscgo.COLOR_VIEWOUTPUT, press=function(_) vscgo.command("view toggle output") end},
     [vscgo.KEY_VIEWDEBUG] = {c=vscgo.COLOR_VIEWDEBUG, press=function(_) vscgo.command("view debug console") end},
