@@ -24,6 +24,7 @@ require "mocked-keybow"
 require "snippets/multibow"
 local hwk = require("spec/hwkeys")
 local mb = require("snippets/multibow")
+local tt = require("spec/snippets/ticktock")
 
 describe("SHIFT multibow keymap", function()
 
@@ -49,7 +50,7 @@ describe("SHIFT multibow keymap", function()
         end
     end)
 
-    inslit("accepts changes form default", function()
+    inslit("accepts changes from default", function()
         local override = 42
 
         _G.shift = { KEY_SHIFT=override }
@@ -67,49 +68,33 @@ describe("SHIFT multibow keymap", function()
             shift = require("layouts/shift")
         end)
 
-        inslit("SHIFT grabs", function()
-            spy.on(mb, "grab")
-            spy.on(mb, "ungrab")
-
-            -- route in the SHIFT permanent keymap
-            hwk.press(shift.KEY_SHIFT)
-            assert.spy(mb.grab).was.called(1)
-            assert.spy(mb.grab).was.called_with(shift.keymap_shifted.name)
-
-            -- route in the shifted(!) SHIFT keymap, so this checks
-            -- that we ungrab correctly
-            mb.grab:clear()
-            hwk.release(shift.KEY_SHIFT)
-            assert.spy(mb.grab).was_not.called()
-            assert.spy(mb.ungrab).was.called(1)
-
-            mb.grab:revert()
-            mb.ungrab:revert()
+        after_each(function()
+            mb.ungrab()
         end)
 
-        inslit("only lonely SHIFT triggers shift and no dangling grabs", function()
+        inslit("short SHIFT tries to shift current keymap", function()
             stub(shift, "shift_secondary_keymap")
 
-            -- test that lonely SHIFT triggers...
-            hwk.tap(shift.KEY_SHIFT)
-            assert.is_nil(mb.grab_keymap)
+            hwk.press(shift.KEY_SHIFT)
+            tt.ticktock(shift.HOLD/2)
+            hwk.release(shift.KEY_SHIFT)
+            tt.ticktock(shift.HOLD)
+            assert.is.Nil(mb.grabber())
             assert.stub(shift.shift_secondary_keymap).was.called(1)
-
-            -- but that SHIFT followed by another function doesn't shift.
-            shift.shift_secondary_keymap:clear()
-            for _, key in ipairs({
-                shift.KEY_LAYOUT,
-                shift.KEY_BRIGHTNESS
-            }) do
-                hwk.press(shift.KEY_SHIFT)
-                hwk.tap(key)
-                hwk.release(shift.KEY_SHIFT)
-                assert.is_nil(mb.grab_keymap)
-                assert.stub(shift.shift_secondary_keymap).was_not.called()
-            end
         end)
 
-        inslit("lonly SHIFTs shift around", function()
+        inslit("long SHIFT grabs special SHIFT layout", function()
+            stub(shift, "shift_secondary_keymap")
+
+            hwk.press(shift.KEY_SHIFT)
+            tt.ticktock(shift.HOLD*1.2)
+            hwk.release(shift.KEY_SHIFT)
+            tt.ticktock(shift.HOLD)
+            assert.is.Not.Nil(mb.grabber())
+            assert.stub(shift.shift_secondary_keymap).was.Not.called()
+        end)
+
+        inslit("short SHIFTs shifts to shifted test layout", function()
             local keymap = {
                 name="test"
             }
@@ -126,7 +111,10 @@ describe("SHIFT multibow keymap", function()
             spy.on(mb, "activate_keymap")
             local s = stub(keymap_shifted[0], "press")
 
-            hwk.tap(shift.KEY_SHIFT)
+            hwk.press(shift.KEY_SHIFT)
+            tt.ticktock(shift.HOLD/2)
+            hwk.release(shift.KEY_SHIFT)
+            tt.ticktock(10)
             assert.spy(mb.activate_keymap).was.called_with(keymap_shifted.name)
             assert.is.equal(mb.current_keymap, keymap_shifted)
 
@@ -145,14 +133,17 @@ describe("SHIFT multibow keymap", function()
         end)
 
         insl(function()
-            describe("while SHIFTed", function()
+            describe("SHIFT specials", function()
 
                 before_each(function()
                     hwk.press(shift.KEY_SHIFT)
+                    tt.ticktock(shift.HOLD*1.2)
+                    hwk.release(shift.KEY_SHIFT)
+                    tt.ticktock(10)
                 end)
 
                 after_each(function()
-                    hwk.release(shift.KEY_SHIFT)
+                    mb.ungrab()
                 end)
 
                 it("cycles primary keymaps", function()
@@ -186,14 +177,36 @@ describe("SHIFT multibow keymap", function()
                 -- enters SHIFT and check the brightness of brightness key...
                 s:clear()
                 hwk.press(shift.KEY_SHIFT)
+                tt.ticktock(shift.HOLD*1.2)
+                hwk.release(shift.KEY_SHIFT)
+                tt.ticktock(10)
                 assert.spy(s).was.called_with(
                     shift.KEY_BRIGHTNESS,
                     shift.next_brightness_color())
                 -- cycles to next brightness
                 hwk.tap(shift.KEY_BRIGHTNESS)
+                hwk.press(shift.KEY_SHIFT)
+                tt.ticktock(10)
                 hwk.release(shift.KEY_SHIFT)
+                tt.ticktock(10)
             end
             assert.equals(mb.brightness * 100, shift.BRIGHTNESS_LEVELS[1])
+        end)
+
+        inslit("glows in special SHIFT", function()
+            local s= spy.on(shift, "glow")
+
+            hwk.press(shift.KEY_SHIFT)
+            tt.ticktock(shift.HOLD/2)
+            hwk.release(shift.KEY_SHIFT)
+            tt.ticktock(10)
+            assert.spy(s).was.Not.called()
+
+            hwk.press(shift.KEY_SHIFT)
+            tt.ticktock(shift.HOLD+10)
+            hwk.release(shift.KEY_SHIFT)
+            tt.ticktock(1000)
+            assert.spy(s).was.called.at.least(2)
         end)
 
     end)

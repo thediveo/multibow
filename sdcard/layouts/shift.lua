@@ -53,18 +53,31 @@ SHIFT   →LAYOUT  🔆BRIGHT
 ]]--
 
 
+-- Default minimum time in ms to press and hold SHIFT in order to trigger the
+-- special layout for changing layouts and the LED brightness.
+shift.HOLD = shift.HOLD or 500
+
 -- Default hardware key to function assignments, can be overriden by users
 shift.KEY_SHIFT = shift.KEY_SHIFT or 11
 shift.KEY_LAYOUT = shift.KEY_LAYOUT or 8
 shift.KEY_BRIGHTNESS = shift.KEY_BRIGHTNESS or 5
 
+-- (Default) key colors for SHIFT key in normal and special mode.
+shift.COLOR_SHIFT = shift.COLOR_SHIFT or {r=1, g=1, b=1}
+shift.COLOR_SPECIAL = shift.COLOR_SPECIAL or {r=0, g=0, b=1}
+
 shift.BRIGHTNESS_LEVELS = shift.BRIGHTNESS_LEVELS or { 70, 100, 40 }
 
 
--- Internal flag for detecting SHIFT press-release sequences without any SHIFTed
--- function.
-local shift_only = false
-local grabbed_key_count = 0
+-- The pending one-shot alarm object required to detect pressing and holding
+-- the SHIFT for longer than its threshold. We need this alarm object in case
+-- we need to cancel it before it fires.
+local alarm = nil
+-- Drive the glowing SHIFT key when in special mode...
+local glower = nil
+local t0 = 0
+local every = 10 -- ms
+local period = 1000 -- ms
 
 -- Activates the first brightness level...
 shift.brightnesses = table.pack(table.unpack(shift.BRIGHTNESS_LEVELS))
@@ -80,45 +93,65 @@ function shift.shift_secondary_keymap()
     end
 end
 
--- Remember how many grabbed keys are pressed, so we won't ungrab later until
--- all keys have been released.
-function shift.any_press(_)
-    grabbed_key_count = grabbed_key_count + 1
+-- SHIFT key press:
+-- * while in grab, ungrabs; that is, deactivates the special SHIFT overlay.
+--   And switches off the annoyingly glowing SHIFT key ;)
+-- * when not in grab, then starts the alarm for detecting a long press.
+function shift.shiftpress()
+    if mb.grabber() == shift.keymap_shifted then
+        if alarm then alarm:cancel() end
+        alarm = nil
+        if glower then glower:cancel() end
+        glower = nil
+        mb.ungrab()
+    else
+        alarm = mb.after(
+            shift.HOLD,
+            function()
+                -- when SHIFT has been hold long enough, then activate the
+                -- special functions and start glowing the SHIFT key.
+                mb.grab(shift.keymap_shifted.name)
+                alarm = nil
+                glower = mb.every(every, shift.glow)
+                t0 = mb.now
+            end)
+    end
 end
 
--- Only ungrab after last key has been released
-function shift.any_release(_)
-    if grabbed_key_count > 0 then
-        grabbed_key_count = grabbed_key_count - 1
-        if grabbed_key_count == 0 then
-            -- Ungrabs after last key released.
-            mb.ungrab()
-            -- And switches between keymaps within the same set.
-            if shift_only then
-                shift.shift_secondary_keymap()
-            end
+-- SHIFT key release:
+-- * while in grab: don't care.
+-- * when not in grab: cancel any outstanding long-press detection alarm if it
+--   hasn't already been fired and deleted and cycle switch to the SHIFT layer
+--   of the currently active layout.
+function shift.shiftrel()
+    if mb.grabber() ~= shift.keymap_shifted then
+        if alarm then
+            alarm:cancel()
+            alarm = nil
+            shift.shift_secondary_keymap()
         end
     end
 end
 
--- SHIFT press: switches into grabbed SHIFT mode, activating the in-SHIFT keys
--- for brightness change, keymap cycling, et cetera.
-function shift.shift(key)
-    shift_only = true
-    shift.any_press(key)
-    mb.grab(shift.keymap_shifted.name)
+-- Glows the SHIFT key while the special SHIFT functions are active (and we're
+-- in grab mode).
+function shift.glow()
+    local brightness = 0.2 + 0.3 * (1 + math.cos((mb.now - t0)/period*math.pi))
+    mb.led(shift.KEY_SHIFT, {
+        r=brightness * shift.COLOR_SPECIAL.r,
+        g=brightness * shift.COLOR_SPECIAL.g,
+        b=brightness * shift.COLOR_SPECIAL.b
+    })
 end
 
 -- Cycles to the next primary keyboard layout (keymap)
 function shift.cycle(_)
-    shift_only = false
     mb.cycle_primary_keymaps()
 end
 
 -- Changes the Keybow LED brightness, by cycling through different brightness
 -- levels
 function shift.brightness(key)
-    shift_only = false
     mb.cycle_brightness(shift.brightnesses)
     mb.led(key, shift.next_brightness_color())
 end
@@ -136,16 +169,15 @@ end
 shift.keymap = {
   name="shift",
   permanent=true,
-  [shift.KEY_SHIFT] = {c={r=1, g=1, b=1}, press=shift.shift},
+  [shift.KEY_SHIFT] = {c=shift.COLOR_SHIFT, press=shift.shiftpress, release=shift.shiftrel},
 }
 shift.keymap_shifted = {
   name="shift-shifted",
   secondary=true,
-  [-1] = {press=shift.any_press, release=shift.any_release},
-  [shift.KEY_SHIFT] = {c={r=1, g=1, b=1}},
+  [shift.KEY_SHIFT] = {c=shift.COLOR_SPECIAL, press=shift.shiftpress, release=shift.shiftrel},
 
-  [shift.KEY_LAYOUT] = {c={r=0, g=1, b=1}, press=shift.cycle, release=shift.release_other},
-  [shift.KEY_BRIGHTNESS] = {c=shift.next_brightness_color, press=shift.brightness, release=shift.release_other}
+  [shift.KEY_LAYOUT] = {c={r=0, g=1, b=1}, press=shift.cycle},
+  [shift.KEY_BRIGHTNESS] = {c=shift.next_brightness_color, press=shift.brightness}
 }
 mb.register_keymap(shift.keymap)
 mb.register_keymap(shift.keymap_shifted)

@@ -168,3 +168,8 @@ function mb.ungrab()
     mb.grab_keymap = nil
     mb.activate_leds()
 end
+
+-- When a grabbing keymap is active, then returns it, otherwise nil.
+function mb.grabber()
+    return mb.grab_keymap
+end
