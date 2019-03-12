@@ -55,7 +55,7 @@ SHIFT   →LAYOUT  🔆BRIGHT
 
 -- Default minimum time in ms to press and hold SHIFT in order to trigger the
 -- special layout for changing layouts and the LED brightness.
-shift.HOLD = shift.HOLD or 500
+shift.HOLD = shift.HOLD or 750
 
 -- Default hardware key to function assignments, can be overriden by users
 shift.KEY_SHIFT = shift.KEY_SHIFT or 11
