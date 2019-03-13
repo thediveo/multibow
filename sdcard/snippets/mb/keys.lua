@@ -46,11 +46,16 @@ local Keys = {
 -- any of our chaining functions. Please note that we must NOT hide the other
 -- fields that aren't chaining functions.
 function Keys.__index(self, key)
+    -- Let's first see if it's a "real" field in this object, or alternatively
+    -- a "real" field in the class object. Only if that fails, then try to
+    -- handle a chain operation.
+    local val = rawget(self, key) or rawget(Keys, key)
+    if val then return val end
     -- Try to look up the missing field as a chain operator; only if that
     -- succeeds, then remember the chain operator for a following table call
     -- operation. Otherwise, handle the field as any ordinary field.
-    local val = rawget(Keys, "op_" .. key:lower())
-    if val then
+    local op = rawget(Keys, "op_" .. key:lower())
+    if op then
         -- If there's already an operation pending, then offer the convenience
         -- of calling it first, before the store the new operation for later
         -- processing. This allows dropping the function call brackets when
@@ -59,12 +64,9 @@ function Keys.__index(self, key)
         if self.op then
             self.op(self) -- no further args given.
         end
-        self.op = val
+        self.op = op
         return self -- ...always return ourselves for further chaining.
     end
-    -- It's not one of the "magic" chain operations, so we need to look up the
-    -- field in either our own object or in our Keys class.
-    return rawget(self, key) or rawget(Keys, key)
 end
 
 -- When the "keys" table is being called as a function then activate the

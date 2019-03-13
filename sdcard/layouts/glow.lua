@@ -1,4 +1,7 @@
--- A Multibow template layout, useful for starting your own keymap layouts.
+-- A demonstration-only layout glowing a single LED which constantly modulates
+-- its intensity as long as this keybow layout is active. Other than for
+-- demonstration, probably not of too much use, except as maybe some kind of
+-- calm-down device...
 
 --[[
 Copyright 2019 Harald Albrecht
@@ -43,27 +46,42 @@ cable going off "northwards":
 
 ]]--
 
-local timer = nil
-local t = 0
-local every = 10
+local every = 10 -- ms; how often to update the LED.
+local period = 1000 -- ms; length of intensity modulation period. 
 
+local timer = nil -- stores the timer object as long as this layout is active.
+local t = 0
+
+-- When this keybow layout gets activated, start the cyclic timer to update
+-- the LED.
 function glow.activate()
     t = 0
     timer = mb.every(every, glow.led)
 end
 
+-- When the layout gets deactivated, make sure to kill the cyclic timer,
+-- because otherwise the LED would continue glowing to infinity or end of
+-- power.
 function glow.deactivate()
     timer:cancel()
     timer = nil
 end
 
+-- Updates the LED brightness, modulating the intensity using a cosinus wave
+-- with the given period length. The intensity function is independent of how
+-- often the updates get triggered; but the results get jerky if there are too
+-- few updates per second.
 function glow.led()
     t = t + every
     local brightness = 0.5 * (1 - math.cos(t/1000*math.pi))
     mb.led(0, {r=brightness, g=brightness, b=brightness})
 end
 
--- The keymap layout...
+-- The "glow" keymap layout, not there really is much here to see, except for
+-- the "magic" activate= and deactivate= configurations which specify
+-- functions to be called by Multibow when this keymap gets activated or
+-- deactivated. We need this for housekeeping purposes, especially for the
+-- cyclic LED update function.
 glow.keymap = {
     name="glow",
     activate=glow.activate,
