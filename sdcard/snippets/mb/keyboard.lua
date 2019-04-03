@@ -22,10 +22,12 @@ function create_map(layout)
         mods = kl.mods
         for row = 1, 4 do
             for col, glyph in ipairs(layout[field][row]) do
-                map[glyph] = {
-                    keycode=kb.keycodes_layout[row][col],
-                    mods=mods
-                }
+                if glyp ~= "" then
+                    map[glyph] = {
+                        keycode=kb.keycodes_layout[row][col],
+                        mods=mods
+                    }
+                end
             end
         end
     end
@@ -42,7 +44,7 @@ function kb.set_layout(code)
 end
 
 
--- Please note: since Lua hasn't really any Unicode support, despite fishy
+-- Please note: since Lua hasn't really much Unicode support, despite strong
 -- claims to the contrary, we need to be careful when processing Unicode strings
 -- (in UTF-8 encoding). Multibow users must encode their scripts in UTF-8. This
 -- way, we can split such UTF-8 string correctly at glyph boundaries in order to
@@ -50,11 +52,11 @@ end
 -- Plain ASCII wouldn't get us too far here when it comes to international
 -- keyboards. Thus, we work with Unicode in UTF-8 encoding.
 function kb.string_to_keycodes(s)
-    -- See https://stackoverflow.com/a/13238257 for breaking an UTF-8 string
+    -- See https://stackoverflow.com/a/27941567 for breaking an UTF-8 string
     -- down into its individual glyphs (also in UTF-8), thus breaking the Lua
     -- binary string at glyph boundaries. This assumes that we got valid UTF-8
     -- encoding at this point, which is a pretty safe bet.
-    for glyph in str:gmatch("[%z\1-\127\194-\244][\128-\191]*") do
+    for glyph in s:gmatch(utf8.charpattern) do
         -- translate glyph (iff known)
         keycode = kb.layout.map[glyph]
         if keycode then
